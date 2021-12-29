@@ -9,33 +9,69 @@
     <title>Fluffster</title>
 </head>
 <body>
-    <div class="forms-wrapper">
+    <!-- <div class="forms-wrapper">
         <h1 class="title">Welcome to Fluffster</h1>
         <div class="login-form-wrapper">
             <h2 class="subtitle">Login</h2>
-            <form id="login-form" action="" method="post">
+            <form class="form" id="login-form" action="#" method="post">
                 <div class="user-info">
-                    <input type="email" id="login-email" name="email" placeholder="Email" class="input-info" required>
-                    <input type="password" id="login-password" name="pass" placeholder="Password" class="input-info" required>
+                    <div class="input-control">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" name="email" class="input-info" required>
+                        <img class="input-control-icon" src="./assets/icons/check-circle-solid.svg" />
+                        <img class="input-control-icon" src="./assets/icons/exclamation-circle-solid.svg"/>
+                        <small class="error-message">Error message</small>
+                    </div>
+                    <div class="input-control">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" name="pass" class="input-info" required>
+                        <img class="input-control-icon" src="./assets/icons/check-circle-solid.svg" />
+                        <img class="input-control-icon" src="./assets/icons/exclamation-circle-solid.svg"/>
+                        <small class="error-message">Error message</small>
+                    </div>
                 </div>
                 <div class="user-actions">
                     <input type="submit" name="submitBtn" alt="Submit" class="action-elements" id="login-button" value="Log In">
-                    <input type="button" name="submitBtn" alt="Submit" class="action-elements" id="btn" value="btn">
                     <div class="alternative">
                         <span class="question">Don't have an account?</span>
                         <a href="#" class="action-elements" id="login-link">Sign up</a>
                     </div>
                 </div>
             </form>
-        </div>
+        </div> -->
 
-        <!-- <div class="sign-up-form form hidden">
+        <div class="sign-up-form form hidden">
             <h2 class="subtitle">Sign up</h2>
-            <form id="sign-up-form" action="#" method="post">
+            <form class="form" id="sign-up-form" action="#" method="post">
                 <div class="user-info">
-                    <input type="email" id="sign-upemail" name="email" placeholder="Email" class="input-info" required>
-                    <input type="password" id="sign-up-password" name="pass" placeholder="Password" class="input-info" required>
-                    <input type="password" id="sign-up-conf-password" name="conf-pass" placeholder="Confirm password" class="input-info" required>
+                    <div class="input-control">
+                        <label for="sign-up-username">Username</label>
+                        <input type="text" id="sign-up-username" name="username" class="input-info" required />
+                        <img class="input-control-icon" src="./assets/icons/check-circle-solid.svg" />
+                        <img class="input-control-icon" src="./assets/icons/exclamation-circle-solid.svg"/>
+                        <small class="error-message">Error message</small>
+                    </div>
+                    <div class="input-control">
+                        <label for="sign-up-email">Email</label>
+                        <input type="email" id="sign-up-email" name="email" class="input-info" required />
+                        <img class="input-control-icon" src="./assets/icons/check-circle-solid.svg" />
+                        <img class="input-control-icon" src="./assets/icons/exclamation-circle-solid.svg"/>
+                        <small class="error-message">Error message</small>
+                    </div>
+                    <div class="input-control">
+                        <label for="sign-up-password">Password</label>
+                        <input type="password" id="sign-up-password" name="pass" class="input-info" required />
+                        <img class="input-control-icon" src="./assets/icons/check-circle-solid.svg" />
+                        <img class="input-control-icon" src="./assets/icons/exclamation-circle-solid.svg"/>
+                        <small class="error-message">Error message</small>
+                    </div>
+                    <div class="input-control">
+                        <label for="sign-up-conf-password">Confirm password</label>
+                        <input type="password" id="sign-up-conf-password" name="conf-pass" class="input-info" required />
+                        <img class="input-control-icon" src="./assets/icons/check-circle-solid.svg" />
+                        <img class="input-control-icon" src="./assets/icons/exclamation-circle-solid.svg"/>
+                        <small class="error-message">Error message</small>
+                    </div>
                 </div>
                 <div class="user-actions">
                     <input type="submit" name="submitBtn" alt="Submit" class="action-elements" id="sign-up-button" value="Sign up">
@@ -45,7 +81,7 @@
                     </div>
                 </div>
             </form>
-        </div> -->
+        </div>
     </div>
 </body>
 </html>
