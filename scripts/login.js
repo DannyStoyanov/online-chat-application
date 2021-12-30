@@ -1,4 +1,6 @@
 // Sign up
+var storage = window.localStorage;
+
 const signUpFormElement = document.getElementById('sign-up-form');
 const signUpButtonElement = document.getElementById('sign-up-button');
 const signUpUsernameElement = document.getElementById('sign-up-username');
@@ -23,19 +25,15 @@ function checkEmailAndPass(user) {
     return false;
 }
 
-function existingUser(user) {
-    const email = user[1];
-    for (let index = 0; index < storage.length; index++) {
-        const record = storage.getItem(`user_${index}`);
-        if (record['email'] === email) {
-            return true;
-        }
+function existingEmailAddress() {
+    const email = signUpEmailElement.value.trim();
+    if (storage.getItem(`${email}`) === null) {
+        return false;
     }
-    return false;
+    return true;
 }
 
 function checkUsername() {
-    // get the input value
     const inputUsername = signUpUsernameElement.value.trim();
     if (inputUsername === '') {
         setErrorFor(signUpUsernameElement, 'Username cannot be blank');
@@ -57,7 +55,12 @@ function checkEmail() {
         setErrorFor(signUpEmailElement, 'Email address is not valid');
     }
     else {
-        setSuccessFor(signUpEmailElement);
+        if (existingEmailAddress() === true) {
+            setErrorFor(signUpEmailElement, 'This email address is already used');
+        }
+        else {
+            setSuccessFor(signUpEmailElement);
+        }
     }
 }
 
@@ -127,4 +130,29 @@ signUpPasswordElement.addEventListener('change', event => {
 signUpConfPassElement.addEventListener('change', event => {
     event.preventDefault();
     checkConfPass();
+});
+
+function successInputControl() {
+    const inputControlList = document.getElementById('sign-up-user-info').querySelectorAll('.input-control');
+    var counter = 0;
+    for (let index = 0; index < inputControlList.length; index++) {
+        if (inputControlList[index].classList.contains('success') === true) {
+            counter++;
+        }
+    }
+    return counter === inputControlList.length;
+}
+
+signUpButtonElement.addEventListener('click', event => {
+    event.preventDefault();
+    if (successInputControl() === true) {
+        signUpFormElement.submit();
+        const username = signUpUsernameElement.value.trim();
+        const email = signUpEmailElement.value.trim();
+        const password = signUpPasswordElement.value.trim();
+        storage.setItem(email, JSON.stringify([username, email, password]));
+    }
+    else {
+        alert("Incorrect input fields!");
+    }
 });
