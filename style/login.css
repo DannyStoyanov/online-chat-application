@@ -54,7 +54,7 @@ body {
 }
 
 .input-control small {
-    /* visibility: hidden; */
+    visibility: hidden;
     position: absolute;
     bottom: 0px;
     left: 0px;
@@ -73,22 +73,32 @@ body {
 
 .input-control.success i.fa-check-circle {
     color: green;
+    visibility: visible;
+}
+
+.input-control.error i.fa-exclamation-circle {
+    visibility: hidden;
 }
 
 .input-control.success small {
     color: green;
+    visibility: visible;
 }
 
 .input-control.error input {
-    /* visibility: hidden; */
     border-color: red;
 }
 
 .input-control.error i.fa-exclamation-circle {
-    /* visibility: hidden; */
     color: red;
+    visibility: visible;
+}
+
+.input-control.error i.fa-check-circle {
+    visibility: hidden;
 }
 
 .input-control.error small {
     color: red;
+    visibility: visible;
 }
