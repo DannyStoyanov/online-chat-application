@@ -1,4 +1,3 @@
-// Sign up
 var storage = window.localStorage;
 
 const signUpFormElement = document.getElementById('sign-up-form');
@@ -9,25 +8,19 @@ const signUpPasswordElement = document.getElementById('sign-up-password');
 const signUpConfPassElement = document.getElementById('sign-up-conf-pass');
 
 const loginFormElement = document.getElementById('login-form');
+const loginButtonElement = document.getElementById('login-button');
 const loginEmailElement = document.getElementById('login-email');
 const loginPasswordElement = document.getElementById('login-password');
 
+window.addEventListener('load', (event) => {
+    // signUpFormElement.classList.add("hidden");
+});
 
-function checkEmailAndPass(user) {
-    const email = user[1];
-    const password = user[2];
-    for (let index = 0; index < storage.length; index++) {
-        var record = storage.getItem();
-        if ((record['email'] === email) && (record['password'] === password)) {
-            return true;
-        }
-    }
-    return false;
-}
+// Sign up functionality
 
-function existingEmailAddress() {
-    const email = signUpEmailElement.value.trim();
-    if (storage.getItem(`${email}`) === null) {
+function existingSignUpgEmailAddress() {
+    const signUpEmail = signUpEmailElement.value.trim();
+    if (storage.getItem(`${signUpEmail}`) === null) {
         return false;
     }
     return true;
@@ -55,7 +48,7 @@ function checkEmail() {
         setErrorFor(signUpEmailElement, 'Email address is not valid');
     }
     else {
-        if (existingEmailAddress() === true) {
+        if (existingSignUpgEmailAddress() === true) {
             setErrorFor(signUpEmailElement, 'This email address is already used');
         }
         else {
@@ -77,13 +70,19 @@ function checkPassword() {
 function checkConfPass() {
     const inputPassword = signUpPasswordElement.value.trim();
     const inputConfPass = signUpConfPassElement.value.trim();
-    // alert(`${inputPassword} - ${inputConfPass}  result: ${inputPassword === inputConfPass}`);
     if (inputPassword !== inputConfPass) {
         setErrorFor(signUpConfPassElement, 'Passwords do not match');
     }
     else {
         setSuccessFor(signUpConfPassElement);
     }
+}
+
+function checkSignUpInputs() {
+    checkUsername();
+    checkEmail();
+    checkPassword();
+    checkConfPass();
 }
 
 function setErrorFor(input, message) {
@@ -104,6 +103,15 @@ function setSuccessFor(input) {
 
     // add success class and remove error class
     inputControl.classList.add('success');
+    inputControl.classList.remove('error');
+}
+
+function setNeutral(input) {
+    const inputControl = input.parentElement; // .input-control - div
+    const small = inputControl.querySelector('small'); // small - tag
+    small.innerHTML = '';
+    
+    inputControl.classList.remove('success');
     inputControl.classList.remove('error');
 }
 
@@ -151,8 +159,52 @@ signUpButtonElement.addEventListener('click', event => {
         const email = signUpEmailElement.value.trim();
         const password = signUpPasswordElement.value.trim();
         storage.setItem(email, JSON.stringify([username, email, password]));
+        signUpUsernameElement.value = '';
+        signUpEmailElement.value = '';
+        signUpPasswordElement.value = '';
+        signUpConfPassElement.value = '';
     }
     else {
-        alert("Incorrect input fields!");
+        checkSignUpInputs();
+    }
+});
+
+// Login functionality
+
+function existingLoginEmailAddress() {
+    const loginEmail = loginEmailElement.value.trim();
+    if (storage.getItem(`${loginEmail}`)) {
+        return true;
+    }
+    return false;
+}
+
+function checkEmailAndPass() {
+    const inputEmail = loginEmailElement.value.trim();
+    const inputPassword = loginPasswordElement.value.trim();
+    const data = JSON.parse(storage.getItem(`${inputEmail}`));
+    if ((data[1] === inputEmail) && (data[2] === inputPassword)) {
+        return true;
+    }
+    return false;
+}
+
+loginButtonElement.addEventListener("click", event => {
+    event.preventDefault();
+    if (existingLoginEmailAddress() === true) {
+        setSuccessFor(loginEmailElement);
+        if (checkEmailAndPass() === true) {
+            loginFormElement.submit();
+            storage.setItem('current-user', JSON.stringify(loginEmailElement.value.trim()));
+            loginEmailElement.value = '';
+            loginPasswordElement.value = '';
+        }
+        else {
+            setErrorFor(loginPasswordElement, 'Incorrect password');
+        }
+    }
+    else {
+        setNeutral(loginPasswordElement);
+        setErrorFor(loginEmailElement, 'Incorrect email address');
     }
 });
