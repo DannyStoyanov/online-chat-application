@@ -35,6 +35,7 @@ function existingUser(user) {
 }
 
 function checkUsername() {
+    // get the input value
     const inputUsername = signUpUsernameElement.value.trim();
     if (inputUsername === '') {
         setErrorFor(signUpUsernameElement, 'Username cannot be blank');
@@ -44,6 +45,7 @@ function checkUsername() {
     }
 }
 
+// Regex email checking function
 function validateEmail(email) {
     const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
@@ -71,7 +73,7 @@ function checkPassword() {
 
 function checkConfPass() {
     const inputPassword = signUpPasswordElement.value.trim();
-    const inputConfPass = signUpConfPassElement.value.trim(); 
+    const inputConfPass = signUpConfPassElement.value.trim();
     // alert(`${inputPassword} - ${inputConfPass}  result: ${inputPassword === inputConfPass}`);
     if (inputPassword !== inputConfPass) {
         setErrorFor(signUpConfPassElement, 'Passwords do not match');
@@ -82,22 +84,24 @@ function checkConfPass() {
 }
 
 function setErrorFor(input, message) {
-    const inputControl = input.parentElement; // .input-control div
-    const small = inputControl.querySelector('small'); // small tag
+    const inputControl = input.parentElement; // .input-control - div
+    const small = inputControl.querySelector('small'); // small - tag
     // adding message inside small
     small.innerHTML = `${message}`;
 
-    // add error class
-    inputControl.classList.remove('success');
+    // add error class and remove success class
     inputControl.classList.add('error');
+    inputControl.classList.remove('success');
 }
 
 function setSuccessFor(input) {
-    const inputControl = input.parentElement; // .input-control div
-    const small = inputControl.querySelector('small'); // small tag
+    const inputControl = input.parentElement; // .input-control - div
+    const small = inputControl.querySelector('small'); // small - tag
     small.innerHTML = '';
-    inputControl.classList.remove('error');
+
+    // add success class and remove error class
     inputControl.classList.add('success');
+    inputControl.classList.remove('error');
 }
 
 signUpUsernameElement.addEventListener('change', event => {
@@ -112,8 +116,8 @@ signUpEmailElement.addEventListener('change', event => {
 
 signUpPasswordElement.addEventListener('change', event => {
     event.preventDefault();
-    if(signUpPasswordElement.value.trim() != '') {
-        if(signUpConfPassElement.value !== '') {
+    if (signUpPasswordElement.value.trim() != '') {
+        if (signUpConfPassElement.value !== '') {
             checkConfPass();
         }
     }
