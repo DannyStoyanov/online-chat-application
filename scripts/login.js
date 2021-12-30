@@ -204,6 +204,7 @@ loginButtonElement.addEventListener("click", event => {
         }
     }
     else {
+        loginPasswordElement.value = '';
         setNeutral(loginPasswordElement);
         setErrorFor(loginEmailElement, 'Incorrect email address');
     }
