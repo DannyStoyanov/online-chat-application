@@ -1,27 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/style/login.css">
+    <link rel="stylesheet" href="/style/all.min.css">
     <script src="./scripts/login.js" type="module"></script>
     <title>Fluffster</title>
 </head>
+
 <body>
-    <!-- <div class="forms-wrapper">
+    <div class="forms-wrapper">
         <h1 class="title">Welcome to Fluffster</h1>
+        <!--
         <div class="login-form-wrapper">
             <h2 class="subtitle">Login</h2>
             <form class="form" id="login-form" action="#" method="post">
                 <div class="user-info">
                     <div class="input-control">
                         <label for="login-email">Email</label>
-                        <input type="email" id="login-email" name="email" class="input-info" required>
+                        <input type="email" id="login-email" name="email" class="input-info">
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small class="error-message">Error message</small>
                     </div>
                     <div class="input-control">
                         <label for="login-password">Password</label>
-                        <input type="password" id="login-password" name="pass" class="input-info" required>
+                        <input type="password" id="login-password" name="pass" class="input-info">
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small class="error-message">Error message</small>
                     </div>
                 </div>
                 <div class="user-actions">
@@ -36,27 +46,39 @@
 
         <div class="sign-up-form form hidden">
             <h2 class="subtitle">Sign up</h2>
-            <form class="form" id="sign-up-form" action="#" method="post">
+            <form class="form" id="sign-up-form">
                 <div class="user-info">
                     <div class="input-control">
                         <label for="sign-up-username">Username</label>
-                        <input type="text" id="sign-up-username" name="username" class="input-info" required />
+                        <input type="text" id="sign-up-username" name="username" class="input-info" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small class="error-message">Error message</small>
                     </div>
                     <div class="input-control">
                         <label for="sign-up-email">Email</label>
-                        <input type="email" id="sign-up-email" name="email" class="input-info" required />
+                        <input type="email" id="sign-up-email" name="email" class="input-info" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small class="error-message">Error message</small>
                     </div>
                     <div class="input-control">
                         <label for="sign-up-password">Password</label>
-                        <input type="password" id="sign-up-password" name="pass" class="input-info" required />
+                        <input type="password" id="sign-up-password" name="pass" class="input-info" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small class="error-message">Error message</small>
                     </div>
                     <div class="input-control">
                         <label for="sign-up-conf-password">Confirm password</label>
-                        <input type="password" id="sign-up-conf-password" name="conf-pass" class="input-info" required />
+                        <input type="password" id="sign-up-conf-password" name="conf-pass" class="input-info" />
+                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <small class="error-message">Error message</small>
                     </div>
                 </div>
                 <div class="user-actions">
-                    <input type="submit" name="submitBtn" alt="Submit" class="action-elements" id="sign-up-button" value="Sign up">
+                    <button name="submitBtn" alt="Submit" class="action-elements" id="sign-up-button">Sign up</button>
                     <div class="alternative">
                         <span class="question">Already a member?</span>
                         <a href="#" class="action-elements" id="log-in-link">Log In</a>
@@ -66,8 +88,11 @@
         </div>
     </div>
 </body>
+
 </html>
 
-<!-- <img class="input-control-icon" src="./assets/icons/check-circle-solid.svg" />
+<!-- 
+<img class="input-control-icon" src="./assets/icons/check-circle-solid.svg" />
 <img class="input-control-icon" src="./assets/icons/exclamation-circle-solid.svg"/>
-<small class="error-message">Error message</small> -->
+<small class="error-message">Error message</small>
+ -->
