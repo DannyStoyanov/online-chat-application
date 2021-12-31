@@ -1,7 +1,8 @@
 // Localstorage
 var storage = window.localStorage;
 
-// DOM elements
+// Sign up DOM elements
+const signUpDivElement = document.getElementById('sign-up-form-wrapper');
 const signUpFormElement = document.getElementById('sign-up-form');
 const signUpButtonElement = document.getElementById('sign-up-button');
 const signUpUsernameElement = document.getElementById('sign-up-username');
@@ -9,6 +10,8 @@ const signUpEmailElement = document.getElementById('sign-up-email');
 const signUpPasswordElement = document.getElementById('sign-up-password');
 const signUpConfPassElement = document.getElementById('sign-up-conf-pass');
 
+// Login DOM elements
+const loginDivElement = document.getElementById('login-form-wrapper');
 const loginFormElement = document.getElementById('login-form');
 const loginButtonElement = document.getElementById('login-button');
 const loginEmailElement = document.getElementById('login-email');
@@ -16,7 +19,17 @@ const loginPasswordElement = document.getElementById('login-password');
 
 // Default onload page state
 window.addEventListener('load', (event) => {
-    // signUpFormElement.classList.add("hidden");
+    signUpDivElement.classList.add("hidden");
+});
+
+document.getElementById('to-sign-up-link').addEventListener('click', event => {
+    loginDivElement.classList.add('hidden');
+    signUpDivElement.classList.remove('hidden');
+});
+
+document.getElementById('to-login-link').addEventListener('click', event => {
+    signUpDivElement.classList.add('hidden');
+    loginDivElement.classList.remove('hidden');
 });
 
 // Sign up functionality
