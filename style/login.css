@@ -22,8 +22,7 @@ body {
     bottom:0;
     right:0;
     left:0;
-    /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
     min-width: 100%;
     background: #F1E9D6;
@@ -31,6 +30,7 @@ body {
 
 #title {
     color: #1269C7;
+    font-weight: bolder;
 }
 
 .forms-wrapper {
