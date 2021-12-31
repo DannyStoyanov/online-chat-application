@@ -104,7 +104,14 @@ function checkSignUpInputs() {
     checkUsername();
     checkEmail();
     checkPassword();
-    checkConfPass();
+    const inputControl = signUpPasswordElement.parentElement;
+    if(inputControl.classList.contains("error")===true) {
+        setErrorFor(signUpConfPassElement, '');
+    }
+    else {
+        checkConfPass();
+    }
+    
 }
 
 // Display visual information for the given input in case denied validation - (add red styling)
