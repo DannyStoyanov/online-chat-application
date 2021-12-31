@@ -2,14 +2,25 @@
     box-sizing: border-box;
 }
 
+/* Colors:
+Green: #03A062
+Purple:#8A2BE2
+Beige: #F1E9D6
+Red:   #FF0000
+Blue:  #1269C7
+*/
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-width: 100%;
-    /* background: #05A064; */
     background: #F1E9D6;
+}
+
+#title {
+    color: #1269C7;
 }
 
 .forms-wrapper {
@@ -18,11 +29,13 @@ body {
     justify-content: center;
     align-items: stretch;
 
-    border: 3px solid #05A064;
-    border-radius: 3px;
+    border-left: 8px solid #05A064;
+    border-radius: 0%; /* 3px */
     height: 100%;
     width: 25rem;
     max-width: 100%;
+
+    padding-left: 1rem;
 }
 
 .subwrapper {
@@ -66,7 +79,7 @@ body {
 
 .input-control input:focus {
     outline:none;
-    border-bottom:3px solid 05A064;
+    border-bottom:3px solid #05A064;
 }
 
 .input-control i {
@@ -74,9 +87,10 @@ body {
     width: 15px;
     height: auto;
     position: absolute;
-    top: 40px;
-    right: 10px;
+    top: 45%;
+    right: 5%;
 }
+
 
 .input-control small {
     visibility: hidden;
@@ -90,12 +104,32 @@ body {
     font-size: 1rem;
     height: 50px;
     width: 100%;
+    cursor: pointer;
+    background-color: transparent;
+    font-weight: bold;
+    border-radius: 3px;
+    box-shadow: 2px 5px 5px #888888;
+}
+
+.user-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.alternative {
+    margin-top: 14px;
+    font-size: 14px;
+}
+
+.question {
+    color: #888888;
 }
 
 #to-login-link,
 #to-sign-up-link {
     cursor: pointer;
-    color: blue;
+    color: #1269C7;
     border: none;
     background: transparent;
     text-decoration: underline;
@@ -142,4 +176,55 @@ body {
 .hidden {
     /* visibility: hidden; */
     display: none;
+}
+
+@media only screen and (max-width: 890px) {
+    body {
+        width: 100%;
+        height: 100%;
+        font-size: 2em;
+        border-left: 20px solid #05A064;
+        border-radius: 0%; /* 3px */
+    }
+
+    .forms-wrapper {
+        width: 100%;
+        height: auto;
+        border: none;
+    }
+
+    .subwrapper {
+        padding: 1em 1em;
+        width: 100%;
+    }
+    
+    .input-control {
+        margin-bottom: 2em;
+        padding-bottom: 2em;
+    }
+
+    .input-control input {
+        font-size: 1em;
+    }
+
+    .input-control i {
+        position: absolute;
+        top: 35%;
+        right: 5%;
+    }
+
+    .subwrapper button[type="submit"] {
+        width: 100%;
+        height: 100px;
+        font-size: 1em;
+    }
+
+    .alternative {
+        font-size: 1em;
+    }
+
+    #to-login-link,
+    #to-sign-up-link {
+        font-size: 1em;
+    }
 }
