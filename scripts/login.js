@@ -20,6 +20,14 @@ const loginPasswordElement = document.getElementById('login-password');
 // Default onload page state
 window.addEventListener('load', (event) => {
     signUpDivElement.classList.add("hidden");
+
+    // Setting inputs to default values
+    signUpUsernameElement.value = '';
+    signUpEmailElement.value = '';
+    signUpPasswordElement.value = '';
+    signUpConfPassElement.value = '';
+    loginEmailElement.value = '';
+    loginPasswordElement.value = '';
 });
 
 document.getElementById('to-sign-up-link').addEventListener('click', event => {
@@ -106,7 +114,7 @@ function checkSignUpInputs() {
     checkPassword();
     const inputControl = signUpPasswordElement.parentElement;
     if(inputControl.classList.contains("error")===true) {
-        setErrorFor(signUpConfPassElement, '');
+        setErrorFor(signUpConfPassElement, 'Passwords do not match');
     }
     else {
         checkConfPass();
@@ -211,6 +219,15 @@ signUpButtonElement.addEventListener('click', event => {
 });
 
 // Login functionality
+
+// function checkLoginEmail() {
+    
+// }
+
+// loginEmailElement.addEventListener('change', event => {
+//     event.preventDefault();
+//     checkLoginEmail(); // validatation and style
+// });
 
 // Validate email uniquesness
 function existingLoginEmailAddress() {

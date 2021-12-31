@@ -7,30 +7,42 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100%;
-}
-
-.hidden {
-    display: none;
+    min-width: 100%;
+    /* background: #05A064; */
+    background: #F1E9D6;
 }
 
 .forms-wrapper {
-    border: 1px solid gray;
-    border-radius: 2px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+
+    border: 3px solid #05A064;
+    border-radius: 3px;
+    height: 100%;
     width: 25rem;
     max-width: 100%;
 }
 
 .subwrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
     padding: 20px 30px;
-    position: relative;
+    width: 100%;
 }
 
 .input-control {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
     position: relative;
     margin-bottom: 10px;
     padding-bottom: 20px;
+    width: 100%;
 }
 
 .input-control label {
@@ -46,6 +58,15 @@ body {
     font-size: 14px;
     width: 100%;
     padding: 10px;
+    background-color: transparent;
+    border: none;
+    border-bottom:2px solid #05A064;
+    border-radius: 1px;
+}
+
+.input-control input:focus {
+    outline:none;
+    border-bottom:3px solid 05A064;
 }
 
 .input-control i {
@@ -71,12 +92,23 @@ body {
     width: 100%;
 }
 
+#to-login-link,
+#to-sign-up-link {
+    cursor: pointer;
+    color: blue;
+    border: none;
+    background: transparent;
+    text-decoration: underline;
+}
+
+/* Validation styles */
+
 .input-control.success input {
-    border-color: green;
+    border-color: #05A064;
 }
 
 .input-control.success i.fa-check-circle {
-    color: green;
+    color: #05A064;
     visibility: visible;
 }
 
@@ -85,16 +117,16 @@ body {
 }
 
 .input-control.success small {
-    color: green;
+    color: #05A064;
     visibility: visible;
 }
 
 .input-control.error input {
-    border-color: red;
+    border-color: #FF0000;
 }
 
 .input-control.error i.fa-exclamation-circle {
-    color: red;
+    color: #FF0000;
     visibility: visible;
 }
 
@@ -103,6 +135,11 @@ body {
 }
 
 .input-control.error small {
-    color: red;
+    color: #FF0000;
     visibility: visible;
+}
+
+.hidden {
+    /* visibility: hidden; */
+    display: none;
 }
