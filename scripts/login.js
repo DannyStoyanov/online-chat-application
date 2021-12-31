@@ -220,14 +220,34 @@ signUpButtonElement.addEventListener('click', event => {
 
 // Login functionality
 
-// function checkLoginEmail() {
-    
-// }
+// Check for user with the same email address
+function existingLogingEmailAddress() {
+    const loginEmail = loginEmailElement.value.trim();
+    if (storage.getItem(`${loginEmail}`) === null) {
+        return false; // not existing email
+    }
+    return true; // existing such email
+}
 
-// loginEmailElement.addEventListener('change', event => {
-//     event.preventDefault();
-//     checkLoginEmail(); // validatation and style
-// });
+function checkLoginEmail() {
+    const inputEmail = loginEmailElement.value.trim();
+    if ((validateEmail(inputEmail) === false) || (inputEmail === '')) {
+        setErrorFor(loginEmailElement, 'Incorrect email address');
+    }
+    else {
+        if (existingLogingEmailAddress() === false) {
+            setErrorFor(loginEmailElement, 'Email address is not registered');
+        }
+        else {
+            setSuccessFor(loginEmailElement);
+        }
+    }
+}
+
+loginEmailElement.addEventListener('change', event => {
+    event.preventDefault();
+    checkLoginEmail(); // validatation and style
+});
 
 // Validate email uniquesness
 function existingLoginEmailAddress() {
