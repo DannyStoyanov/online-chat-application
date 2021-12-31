@@ -1,5 +1,7 @@
+// Localstorage
 var storage = window.localStorage;
 
+// DOM elements
 const signUpFormElement = document.getElementById('sign-up-form');
 const signUpButtonElement = document.getElementById('sign-up-button');
 const signUpUsernameElement = document.getElementById('sign-up-username');
@@ -12,36 +14,40 @@ const loginButtonElement = document.getElementById('login-button');
 const loginEmailElement = document.getElementById('login-email');
 const loginPasswordElement = document.getElementById('login-password');
 
+// Default onload page state
 window.addEventListener('load', (event) => {
     // signUpFormElement.classList.add("hidden");
 });
 
 // Sign up functionality
 
+// Check for user with the same email address
 function existingSignUpgEmailAddress() {
     const signUpEmail = signUpEmailElement.value.trim();
     if (storage.getItem(`${signUpEmail}`) === null) {
-        return false;
+        return false; // not existing email
     }
-    return true;
+    return true; // existing such email
 }
 
+// Username validation and visuals for correctness
 function checkUsername() {
     const inputUsername = signUpUsernameElement.value.trim();
     if (inputUsername === '') {
-        setErrorFor(signUpUsernameElement, 'Username cannot be blank');
+        setErrorFor(signUpUsernameElement, 'Username cannot be blank'); // add error message and red styling for input
     }
     else {
-        setSuccessFor(signUpUsernameElement);
+        setSuccessFor(signUpUsernameElement); // add green styling for input
     }
 }
 
-// Regex email checking function
+// Regex email address checking function
 function validateEmail(email) {
     const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
 }
 
+// Email address validation and visuals for correctness
 function checkEmail() {
     const inputEmail = signUpEmailElement.value.trim();
     if ((validateEmail(inputEmail) === false) || (inputEmail === '')) {
@@ -57,6 +63,7 @@ function checkEmail() {
     }
 }
 
+// Password validation and visuals for correctness
 function checkPassword() {
     const inputPassword = signUpPasswordElement.value.trim();
     if (inputPassword.length < 6) {
@@ -67,6 +74,7 @@ function checkPassword() {
     }
 }
 
+// Confirm password validation and visuals for correctness
 function checkConfPass() {
     const inputPassword = signUpPasswordElement.value.trim();
     const inputConfPass = signUpConfPassElement.value.trim();
@@ -78,6 +86,7 @@ function checkConfPass() {
     }
 }
 
+// End-to-end validation
 function checkSignUpInputs() {
     checkUsername();
     checkEmail();
@@ -85,72 +94,82 @@ function checkSignUpInputs() {
     checkConfPass();
 }
 
+// Display visual information for the given input in case denied validation - (add red styling)
 function setErrorFor(input, message) {
     const inputControl = input.parentElement; // .input-control - div
     const small = inputControl.querySelector('small'); // small - tag
-    // adding message inside small
+
+    // Add message inside small
     small.innerHTML = `${message}`;
 
-    // add error class and remove success class
+    // Add error class and remove success class
     inputControl.classList.add('error');
     inputControl.classList.remove('success');
 }
 
+// Display visual information for the given input in case of passed validation - (add green styling)
 function setSuccessFor(input) {
     const inputControl = input.parentElement; // .input-control - div
     const small = inputControl.querySelector('small'); // small - tag
+
+    // Remove error message
     small.innerHTML = '';
 
-    // add success class and remove error class
+    // Add success class and remove error class
     inputControl.classList.add('success');
     inputControl.classList.remove('error');
 }
 
+// Display default(onload) visual information for the given input (remove red/green styling)
 function setNeutral(input) {
     const inputControl = input.parentElement; // .input-control - div
     const small = inputControl.querySelector('small'); // small - tag
+
+    // Remove error message
     small.innerHTML = '';
     
-    inputControl.classList.remove('success');
-    inputControl.classList.remove('error');
+    inputControl.classList.remove('success'); // remove pass validation styling
+    inputControl.classList.remove('error');   // remove denied validation styling
 }
 
 signUpUsernameElement.addEventListener('change', event => {
     event.preventDefault();
-    checkUsername();
+    checkUsername(); // validatation and style
 });
 
 signUpEmailElement.addEventListener('change', event => {
     event.preventDefault();
-    checkEmail();
+    checkEmail(); // validatation and style
 });
 
 signUpPasswordElement.addEventListener('change', event => {
     event.preventDefault();
     if (signUpPasswordElement.value.trim() != '') {
         if (signUpConfPassElement.value !== '') {
-            checkConfPass();
+            checkConfPass(); // validatation and style
         }
     }
-    checkPassword();
+    checkPassword(); // validatation and style
 });
 
 signUpConfPassElement.addEventListener('change', event => {
     event.preventDefault();
-    checkConfPass();
+    checkConfPass(); // validatation and style
 });
 
+// Loop through inputs to check for errors
 function successInputControl() {
-    const inputControlList = document.getElementById('sign-up-user-info').querySelectorAll('.input-control');
+    const inputControlList = document.getElementById('sign-up-user-info').querySelectorAll('.input-control'); // divs
     var counter = 0;
     for (let index = 0; index < inputControlList.length; index++) {
         if (inputControlList[index].classList.contains('success') === true) {
             counter++;
         }
     }
-    return counter === inputControlList.length;
+    return counter === inputControlList.length; // check number of successful validations
 }
 
+// Sign up validation and submition
 signUpButtonElement.addEventListener('click', event => {
     event.preventDefault();
     if (successInputControl() === true) {
@@ -159,6 +178,8 @@ signUpButtonElement.addEventListener('click', event => {
         const email = signUpEmailElement.value.trim();
         const password = signUpPasswordElement.value.trim();
         storage.setItem(email, JSON.stringify([username, email, password]));
+
+        // Setting inputs to default values
         signUpUsernameElement.value = '';
         signUpEmailElement.value = '';
         signUpPasswordElement.value = '';
@@ -171,15 +192,18 @@ signUpButtonElement.addEventListener('click', event => {
 
 // Login functionality
 
+// Validate email uniquesness
 function existingLoginEmailAddress() {
     const loginEmail = loginEmailElement.value.trim();
     if (storage.getItem(`${loginEmail}`)) {
-        return true;
+        return true; // existing such email
     }
-    return false;
+    return false; // not existing email
 }
 
-function checkEmailAndPass() {
+// Check localstorage's records for matching email address and password
+function checkEmailAndPass() { 
+    // NOTE: Check for existing email address before using!
     const inputEmail = loginEmailElement.value.trim();
     const inputPassword = loginPasswordElement.value.trim();
     const data = JSON.parse(storage.getItem(`${inputEmail}`));
@@ -189,6 +213,7 @@ function checkEmailAndPass() {
     return false;
 }
 
+// Login validation and submition
 loginButtonElement.addEventListener("click", event => {
     event.preventDefault();
     if (existingLoginEmailAddress() === true) {
