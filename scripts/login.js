@@ -52,7 +52,7 @@ function existingSignUpgEmailAddress() {
 }
 
 // Username validation and visuals for correctness
-function checkUsername() {
+function checkSignUpUsername() {
     const inputUsername = signUpUsernameElement.value.trim();
     if (inputUsername === '') {
         setErrorFor(signUpUsernameElement, 'Username cannot be blank'); // add error message and red styling for input
@@ -69,7 +69,7 @@ function validateEmail(email) {
 }
 
 // Email address validation and visuals for correctness
-function checkEmail() {
+function checkSignUpEmail() {
     const inputEmail = signUpEmailElement.value.trim();
     if ((validateEmail(inputEmail) === false) || (inputEmail === '')) {
         setErrorFor(signUpEmailElement, 'Email address is not valid');
@@ -85,7 +85,7 @@ function checkEmail() {
 }
 
 // Password validation and visuals for correctness
-function checkPassword() {
+function checkSignUpPassword() {
     const inputPassword = signUpPasswordElement.value.trim();
     if (inputPassword.length < 6) {
         setErrorFor(signUpPasswordElement, 'Password cannot be less than 6 characters');
@@ -96,7 +96,7 @@ function checkPassword() {
 }
 
 // Confirm password validation and visuals for correctness
-function checkConfPass() {
+function checkSignUpConfPass() {
     const inputPassword = signUpPasswordElement.value.trim();
     const inputConfPass = signUpConfPassElement.value.trim();
     if (inputPassword !== inputConfPass) {
@@ -109,15 +109,15 @@ function checkConfPass() {
 
 // End-to-end validation
 function checkSignUpInputs() {
-    checkUsername();
-    checkEmail();
-    checkPassword();
+    checkSignUpUsername();
+    checkSignUpEmail();
+    checkSignUpPassword();
     const inputControl = signUpPasswordElement.parentElement;
     if(inputControl.classList.contains("error")===true) {
         setErrorFor(signUpConfPassElement, 'Passwords do not match');
     }
     else {
-        checkConfPass();
+        checkSignUpConfPass();
     }
     
 }
@@ -162,27 +162,27 @@ function setNeutral(input) {
 
 signUpUsernameElement.addEventListener('change', event => {
     event.preventDefault();
-    checkUsername(); // validatation and style
+    checkSignUpUsername(); // validatation and style
 });
 
 signUpEmailElement.addEventListener('change', event => {
     event.preventDefault();
-    checkEmail(); // validatation and style
+    checkSignUpEmail(); // validatation and style
 });
 
 signUpPasswordElement.addEventListener('change', event => {
     event.preventDefault();
     if (signUpPasswordElement.value.trim() != '') {
         if (signUpConfPassElement.value !== '') {
-            checkConfPass(); // validatation and style
+            checkSignUpConfPass(); // validatation and style
         }
     }
-    checkPassword(); // validatation and style
+    checkSignUpPassword(); // validatation and style
 });
 
 signUpConfPassElement.addEventListener('change', event => {
     event.preventDefault();
-    checkConfPass(); // validatation and style
+    checkSignUpConfPass(); // validatation and style
 });
 
 // Loop through inputs to check for errors
