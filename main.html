@@ -4,9 +4,57 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="/style/styles.css">
+    <link rel="shortcut icon" type="image/png" href="/assets/logo.png"/>
+    <title>Fluffster</title>
 </head>
 <body>
-    
+    <div id="main-wrapper">
+        <div id="nav-wrapper">
+            <div id="profile">
+                
+            </div>
+            <nav>
+                <ul>
+                    <li>
+                        <i class="fas fa-home"></i>
+                        <span class="menu-option">Home</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-home"></i>
+                        <span class="menu-option">Messages</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-home"></i>
+                        <span class="menu-option">Friends</span>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <section id="listfield-wrapper">
+            <header id="listfield-title">Title</header>
+            <div id="chat-list-wrapper">
+                <ul id="filters">
+                    <li><button id="filter-all-btn" class="filter-btn">All</button></li>
+                    <li><button id="filter-unread-btn" class="filter-btn">Unread</button></li>
+                    <li><button id="filter-groups-btn" class="filter-btn">Groups</button></li>
+                </ul>
+                <div id="chat-tabs">
+
+                </div>
+            </div>
+            <div id="friend-list-wrapper">
+                <div id="friend-tabs">
+
+                </div>
+            </div>
+
+        </section>
+        <div id="chat-wrapper">
+            <div id="chat-room"></div>
+            <div id="chat-window"></div>
+            <div id="chat-input-field"></div>
+        </div>
+    </div>
 </body>
 </html>
