@@ -5,45 +5,55 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/style/styles.css">
+    <link rel="stylesheet" href="/style/all.min.css">
     <link rel="shortcut icon" type="image/png" href="/assets/logo.png"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Beastly&display=swap" rel="stylesheet">
+    
+    
     <title>Fluffster</title>
 </head>
 <body>
     <div id="main-wrapper">
-        <div id="nav-wrapper">
+        <section id="nav-wrapper">
+            <header id="app-title">
+                <img id="app-logo" src="assets/logo.png" alt="logo" />
+                <h1 id="title">Fluffster</h1>
+            </header>
             <div id="profile">
-                
+                <i class="far fa-user"></i>
+                <span id="profile-username">User</span>
+                <span id="profile-email">example@gmail.com</span>
             </div>
             <nav>
-                <ul>
-                    <li>
-                        <i class="fas fa-home"></i>
-                        <span class="menu-option">Home</span>
+                <ul id="menu">
+                    <li class="menu-option">
+                        <img class="option-btn" src="assets/message.png"/>
                     </li>
-                    <li>
-                        <i class="fas fa-home"></i>
-                        <span class="menu-option">Messages</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-home"></i>
-                        <span class="menu-option">Friends</span>
+                    <li class="menu-option">
+                        <img class="option-btn" src="assets/users.png"/>
                     </li>
                 </ul>
             </nav>
-        </div>
+        </section>
         <section id="listfield-wrapper">
             <header id="listfield-title">Title</header>
+            <div id="new-chat-btn-wrapper">
+                <button id="new-chat-btn">+</button>
+            </div>
             <div id="chat-list-wrapper">
                 <ul id="filters">
                     <li><button id="filter-all-btn" class="filter-btn">All</button></li>
                     <li><button id="filter-unread-btn" class="filter-btn">Unread</button></li>
                     <li><button id="filter-groups-btn" class="filter-btn">Groups</button></li>
                 </ul>
-                <div id="chat-tabs">
+                <div id="chat-tabs" class="tabs-buffer">
 
                 </div>
             </div>
-            <div id="friend-list-wrapper">
+            <div id="friend-list-wrapper" class="tabs-buffer">
                 <div id="friend-tabs">
 
                 </div>
@@ -51,9 +61,12 @@
 
         </section>
         <div id="chat-wrapper">
-            <div id="chat-room"></div>
+            <div id="chat-room-header"></div>
             <div id="chat-window"></div>
-            <div id="chat-input-field"></div>
+            <div id="chat-input-field">
+                <input id="message-input" type="text">
+                <button id="send-message-btn">Send</button>
+            </div>
         </div>
     </div>
 </body>
