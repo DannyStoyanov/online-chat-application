@@ -1,6 +1,8 @@
 * {
     box-sizing: border-box;
-    border:1px solid red;
+    border:1px solid black;
+    padding: 0px;
+    margin: 0px;
 }
 
 /*
@@ -13,14 +15,14 @@ Colours:
 */
 
 body {
-    min-height: 100vh;
-    min-width: 100vh;
+    min-height: 100%;
+    min-width: 100%;
     background-color: #E0ECDE;
     display: flex;
     justify-content: center;
     align-items: center;
 
-    position:absolute; 
+    position:fixed;
     top:0;
     bottom:0;
     right:0;
@@ -31,7 +33,7 @@ body {
 
 nav { 
     width: 100%;
-    height: 65%;
+    height: 65vh;
 }
 
 ul {
@@ -40,9 +42,29 @@ ul {
     list-style: none;
 }
 
+#main-wrapper {
+    min-width: 80%;
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+#nav-wrapper {
+    min-width: 15%;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
 #app-title {
     width: 100%;
-    height: 7.5%;
+    min-height: 5rem;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -58,27 +80,9 @@ ul {
     height: 50px;
 }
 
-#main-wrapper {
-    min-width: 80%;
-    min-height: 100vh;
-
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: stretch;
-}
-
-#nav-wrapper {
-    width: 15%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-}
-
 #profile {
     width: 100%;
-    height: 27.5%;
+    min-height: 15rem;
 
     display: flex;
     flex-direction: column;
@@ -88,13 +92,14 @@ ul {
 
 #menu {
     width: 100%;
-    height: auto;
+    height: 100%;
 
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 0px;
+    margin: 0px;
 }
 
 .menu-option {
@@ -104,12 +109,13 @@ ul {
 }
 
 .option-btn {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
 }
 
 #listfield-wrapper {
-    width: 25%;
+    min-width: 25%;
 
     display: flex;
     flex-direction: column;
@@ -118,20 +124,20 @@ ul {
 
 #listfield-title {
     width: 100%;
-    height: 7.5%;
+    min-height: 5rem;
 }
 
 #new-chat-btn-wrapper { 
     width: 100%;
-    height: 7.5%;
+    min-height: 5rem;
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
 }
 
 #new-chat-btn {
-    width: 75%;
-    height: 75%;
+    width: 2rem;
+    height: 2rem;
 }
 
 #filters {
@@ -154,11 +160,46 @@ ul {
     top:0;
     left:0;
     width: 100%;
-    height: 100%;
+    min-height: 100%;
+}
+
+.tabs-wrapper {
+    min-width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.chat-tab {
+    min-width: 90%;
+    min-height: 5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 2px;
+    margin: 0.5rem;
+}
+
+.friend-tab {
+    min-width: 95%;
+    min-height: 5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 2px;
+    margin: 0.5rem;
+}
+
+.friend-tab > span {
+    display: block;
+    width: 100%;
 }
 
 #chat-wrapper {
-    width: 60%;
+    min-width: 60%;
 
     display: flex;
     flex-direction: column;
@@ -166,9 +207,21 @@ ul {
     /* align-items: center; */
 }
 
+#chat-room {
+    min-height: 100%;
+    min-width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
 #chat-room-header {
     width: 100%;
-    height: 7.5%;
+    min-height: 5rem;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
 }
 
 #chat-window {
@@ -178,5 +231,10 @@ ul {
 
 #chat-input-field {
     width: 100%;
-    height: 7.5%;
+    height: 5rem;
+}
+
+.hidden {
+    /* visibility: hidden; */
+    display: none;
 }

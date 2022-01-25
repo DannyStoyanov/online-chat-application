@@ -7,12 +7,7 @@
     <link rel="stylesheet" href="/style/styles.css">
     <link rel="stylesheet" href="/style/all.min.css">
     <link rel="shortcut icon" type="image/png" href="/assets/logo.png"/>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik+Beastly&display=swap" rel="stylesheet">
-    
-    
+    <script src="./scripts/script.js" type="module"></script>
     <title>Fluffster</title>
 </head>
 <body>
@@ -30,10 +25,14 @@
             <nav>
                 <ul id="menu">
                     <li class="menu-option">
-                        <img class="option-btn" src="assets/message.png"/>
+                        <button id="open-chat-list-btn">
+                            <img class="option-btn" src="assets/message.png"/>
+                        </button>
                     </li>
                     <li class="menu-option">
-                        <img class="option-btn" src="assets/users.png"/>
+                        <button id="open-friend-list-btn">
+                            <img class="option-btn" src="assets/users.png"/>
+                        </button>
                     </li>
                 </ul>
             </nav>
@@ -41,31 +40,68 @@
         <section id="listfield-wrapper">
             <header id="listfield-title">Title</header>
             <div id="new-chat-btn-wrapper">
+                <input type="text" />
                 <button id="new-chat-btn">+</button>
             </div>
-            <div id="chat-list-wrapper">
+            <div id="chat-list-wrapper" class="tabs-buffer">
                 <ul id="filters">
                     <li><button id="filter-all-btn" class="filter-btn">All</button></li>
                     <li><button id="filter-unread-btn" class="filter-btn">Unread</button></li>
                     <li><button id="filter-groups-btn" class="filter-btn">Groups</button></li>
                 </ul>
-                <div id="chat-tabs" class="tabs-buffer">
+                <div id="chat-tabs" class="tabs-wrapper">
+                    
+                    <div class="chat-tab">
+                        <img class="user-profile-pic" alt="user_logo"/>
+                        <div>
+                            <span class="username">Unkown sender</span>
+                            <span class="message-preview">Sample message sent</span>
+                        </div>
+                        <span class="time-sent">1 day</span>
+                    </div>
+                    <div class="chat-tab">
+                        <img class="user-profile-pic" alt="user_logo"/>
+                        <div>
+                            <span class="username">Unkown sender</span>
+                            <span class="message-preview">Sample message sent</span>
+                        </div>
+                        <span class="time-sent">1 day</span>
+                    </div>
 
                 </div>
             </div>
-            <div id="friend-list-wrapper" class="tabs-buffer">
-                <div id="friend-tabs">
+            <div id="friend-list-wrapper" class="tabs-buffer tabs-wrapper">
 
+                <div class="friend-tab">
+                    <img class="user-profile-pic" alt="user_logo"/>
+                    <span class="username">Unknown sender</span>
                 </div>
+                <div class="friend-tab">
+                    <img class="user-profile-pic" alt="user_logo"/>
+                    <span class="username">Unknown sender</span>
+                </div>
+                
             </div>
-
         </section>
         <div id="chat-wrapper">
-            <div id="chat-room-header"></div>
-            <div id="chat-window"></div>
-            <div id="chat-input-field">
-                <input id="message-input" type="text">
-                <button id="send-message-btn">Send</button>
+            <div id="chat-room">
+                <div id="chat-room-header">
+                    <div>
+                        <img alt="user-profile-pic"/>
+                    </div>
+                    <div>
+                        <span>Unknown sender</span>
+                        <span>Active</span>
+                    </div>
+                    <div>
+    
+                    </div>
+                </div>
+                <div id="chat-window"></div>
+                <div id="chat-input-field">
+                    <input id="message-input" type="text">
+                    <button id="send-message-btn">Send</button>
+                </div>
             </div>
         </div>
     </div>
