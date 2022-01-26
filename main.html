@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="./style/styles.css">
     <link rel="stylesheet" href="./style/all.min.css">
     <link rel="shortcut icon" type="image/png" href="./assets/logo.png"/>
-    <script src="./scripts/script.js" type="text/javascript"></script>
+    <script src="./scripts/script.js" type="module"></script>
     <title>Fluffster</title>
 </head>
 <body>
@@ -18,21 +18,20 @@
                 <h1 id="title">Fluffster</h1>
             </header>
             <div id="profile">
-                <i class="far fa-user"></i>
+                <img src="./assets/default_profile.png" id="user-profile-pic" alt="user-profile-picture"/>
                 <span id="profile-username">User</span>
                 <span id="profile-email">example@gmail.com</span>
+                <button id="log-out-btn">Log Out</button>
             </div>
             <nav>
                 <ul id="menu">
-                    <li class="menu-option">
-                        <button id="open-chat-list-btn">
-                            <img class="option-btn" src="assets/message.png"/>
-                        </button>
+                    <li id="open-chat-list-btn" class="menu-option active-menu-option">
+                        <img class="option-img" src="./assets/message.png"/>
+                        <span>Messages</span>
                     </li>
-                    <li class="menu-option">
-                        <button id="open-friend-list-btn">
-                            <img class="option-btn" src="assets/users.png"/>
-                        </button>
+                    <li id="open-friend-list-btn" class="menu-option active-menu-option">
+                        <img class="option-img" src="./assets/users.png"/>
+                        <span>Contacts</span>
                     </li>
                 </ul>
             </nav>
