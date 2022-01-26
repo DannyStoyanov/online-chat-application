@@ -205,6 +205,15 @@ ul {
 }
 
 #listfield-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #2C6975;
+
+    font-size: 1.5em;
+}
+
+#listfield-title {
     width: 100%;
     min-height: 5rem;
 }

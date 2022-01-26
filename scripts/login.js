@@ -206,12 +206,13 @@ signUpButtonElement.addEventListener('click', event => {
         const email = signUpEmailElement.value.trim();
         const password = signUpPasswordElement.value.trim();
         storage.setItem(email, JSON.stringify([username, email, password]));
-
+        
         // Setting inputs to default values
         signUpUsernameElement.value = '';
         signUpEmailElement.value = '';
         signUpPasswordElement.value = '';
         signUpConfPassElement.value = '';
+        window.location.href='./main.html';
     }
     else {
         checkSignUpInputs();
@@ -280,6 +281,7 @@ loginButtonElement.addEventListener("click", event => {
             storage.setItem('current-user', JSON.stringify(loginEmailElement.value.trim()));
             loginEmailElement.value = '';
             loginPasswordElement.value = '';
+            window.location.href='./main.html';
         }
         else {
             setErrorFor(loginPasswordElement, 'Incorrect password');
