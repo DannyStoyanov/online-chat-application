@@ -18,7 +18,7 @@
                 <h1 id="title">Fluffster</h1>
             </header>
             <div id="profile">
-                <img src="./assets/default_profile.png" id="user-profile-pic" alt="user-profile-picture"/>
+                <img src="./assets/icons/default_profile.png" id="user-profile-pic" alt="user-profile-picture"/>
                 <span id="profile-username">User</span>
                 <span id="profile-email">example@gmail.com</span>
                 <button id="log-out-btn">Log Out</button>
@@ -26,11 +26,11 @@
             <nav>
                 <ul id="menu">
                     <li id="open-chat-list-btn" class="menu-option active-menu-option">
-                        <img class="option-img" src="./assets/message.png"/>
+                        <img class="option-img" src="./assets/icons/message.png"/>
                         <span>Messages</span>
                     </li>
                     <li id="open-friend-list-btn" class="menu-option active-menu-option">
-                        <img class="option-img" src="./assets/users.png"/>
+                        <img class="option-img" src="./assets/icons/users.png"/>
                         <span>Contacts</span>
                     </li>
                 </ul>
@@ -39,7 +39,7 @@
         <section id="listfield-wrapper">
             <header id="listfield-title"></header>
             <div id="new-chat-btn-wrapper">
-                <input type="text" />
+                <input id="searchfield" type="text" placeholder="Search" />
                 <button id="new-chat-btn">+</button>
             </div>
             <div id="chat-list-wrapper" class="tabs-buffer">
@@ -51,20 +51,24 @@
                 <div id="chat-tabs" class="tabs-wrapper">
                     
                     <div class="chat-tab">
-                        <img class="user-profile-pic" alt="user_logo"/>
-                        <div>
-                            <span class="username">Unkown sender</span>
+                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
+                        <div class="chat-preview">
+                            <div class="message-info">
+                                <span class="username">Unkown sender</span>
+                                <span class="time-sent">1 day</span>
+                            </div>
                             <span class="message-preview">Sample message sent</span>
                         </div>
-                        <span class="time-sent">1 day</span>
                     </div>
                     <div class="chat-tab">
-                        <img class="user-profile-pic" alt="user_logo"/>
-                        <div>
-                            <span class="username">Unkown sender</span>
+                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
+                        <div class="chat-preview">
+                            <div class="message-info">
+                                <span class="username">Unkown sender</span>
+                                <span class="time-sent">1 day</span>
+                            </div>
                             <span class="message-preview">Sample message sent</span>
                         </div>
-                        <span class="time-sent">1 day</span>
                     </div>
 
                 </div>
@@ -72,11 +76,11 @@
             <div id="friend-list-wrapper" class="tabs-buffer tabs-wrapper">
 
                 <div class="friend-tab">
-                    <img class="user-profile-pic" alt="user_logo"/>
+                    <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
                     <span class="username">Unknown sender</span>
                 </div>
                 <div class="friend-tab">
-                    <img class="user-profile-pic" alt="user_logo"/>
+                    <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
                     <span class="username">Unknown sender</span>
                 </div>
                 
@@ -86,20 +90,18 @@
             <div id="chat-room">
                 <div id="chat-room-header">
                     <div>
-                        <img alt="user-profile-pic"/>
+                        <img src="./assets/icons/default_profile.png" alt="user-profile-pic" id="user-profile-pic-chat"/>
                     </div>
-                    <div>
+                    <div id="chat-room-name">
                         <span>Unknown sender</span>
-                        <span>Active</span>
                     </div>
                     <div>
-    
                     </div>
                 </div>
                 <div id="chat-window"></div>
                 <div id="chat-input-field">
                     <input id="message-input" type="text">
-                    <button id="send-message-btn">Send</button>
+                    <button id="send-message-btn"><img id="send-message-icon" src="assets/icons/send_message.png" alt="send-message-icon"/></button>
                 </div>
             </div>
         </div>
