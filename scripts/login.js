@@ -20,7 +20,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const dataRef = ref(database, "users/");
-// const analytics = getAnalytics(app); 
+// const analytics = getAnalytics(app);
 
 // function writeNewUserData(email, username, password) {
 //     const newUserRef = push(dataRef);
@@ -256,8 +256,8 @@ signUpButtonElement.addEventListener('click', event => {
         
         // Writing user to storage
         const key = writeNewUserData(email, username, password);
-        alert(key);
         storage.setItem(email, JSON.stringify([email, username, password, key]));
+        storage.setItem('current-user', JSON.stringify(signUpEmailElement.value.trim()));
         
         signUpFormElement.submit();
 
