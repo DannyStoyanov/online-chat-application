@@ -19,12 +19,24 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
-const dataRef = ref(database, "users");
+const dataRef = ref(database, "users/");
 // const analytics = getAnalytics(app); 
+
+// function writeNewUserData(email, username, password) {
+//     const newUserRef = push(dataRef);
+//     set(newUserRef, {
+//         "email": email,
+//         "username": username,
+//         "password": password,
+//         "profile_picture": "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png",
+//         "contacts": {},
+//         "chats": {}
+//     });
+// }
 
 function writeNewUserData(email, username, password) {
     const newUserRef = push(dataRef);
-    set(newUserRef, {
+    set(ref(database, 'users/' + newUserRef.key), {
         "email": email,
         "username": username,
         "password": password,
@@ -32,6 +44,7 @@ function writeNewUserData(email, username, password) {
         "contacts": {},
         "chats": {}
     });
+    return newUserRef.key;
 }
 
 // Localstorage
@@ -242,8 +255,9 @@ signUpButtonElement.addEventListener('click', event => {
         const password = signUpPasswordElement.value.trim();
         
         // Writing user to storage
-        writeNewUserData(email, username, password);
-        storage.setItem(email, JSON.stringify([email, username, password]));
+        const key = writeNewUserData(email, username, password);
+        alert(key);
+        storage.setItem(email, JSON.stringify([email, username, password, key]));
         
         signUpFormElement.submit();
 
