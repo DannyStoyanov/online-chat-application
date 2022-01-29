@@ -27,9 +27,12 @@ const chatListElement = document.getElementById('chat-list-wrapper');
 const chatListButtonElement = document.getElementById('open-chat-list-btn');
 const friendListButtonElement = document.getElementById('open-friend-list-btn');
 const logOutButtonElement = document.getElementById('log-out-btn');
-const filterAllButtonElement = document.getElementById('filter-all-btn');
-const filterUnreadButtonElement = document.getElementById('filter-unread-btn');
-const filterGroupsButtonElement = document.getElementById('filter-groups-btn');
+const filterAllMessagesButtonElement = document.getElementById('filter-all-messages-btn');
+const filterUnreadMessagesButtonElement = document.getElementById('filter-unread-messages-btn');
+const filterGroupsMessagesButtonElement = document.getElementById('filter-group-messages-btn');
+const filterRequestsMessagesButtonElement = document.getElementById('filter-request-messages-btn');
+const filterAllContactsButtonElement = document.getElementById('filter-all-contacts-btn');
+const filterRequestContactsButtonElement = document.getElementById('filter-request-contacts-btn');
 
 // Localstorage
 var storage = window.localStorage;
@@ -44,7 +47,10 @@ window.addEventListener('load', (event) => {
     loadCurrentUser();
 
     // Chat default filter
-    filterAllButtonElement.classList.add('current-filter');
+    filterAllMessagesButtonElement.classList.add('current-filter');
+
+    // Contacts default filer
+    filterAllContactsButtonElement.classList.add('current-filter');
 
     // chatListElement.classList.add("hidden");
     updateTitle();
@@ -132,22 +138,51 @@ function logOut() {
 // Chat settings:
 
 // Filter all messages
-filterAllButtonElement.addEventListener('click', (event) => {
-    filterAllButtonElement.classList.add('current-filter');
-    filterUnreadButtonElement.classList.remove('current-filter');
-    filterGroupsButtonElement.classList.remove('current-filter');
+filterAllMessagesButtonElement.addEventListener('click', (event) => {
+    filterAllMessagesButtonElement.classList.add('current-filter');
+
+    filterUnreadMessagesButtonElement.classList.remove('current-filter');
+    filterGroupsMessagesButtonElement.classList.remove('current-filter');
+    filterRequestsMessagesButtonElement.classList.remove('current-filter');
 });
 
 // Filter unread messages
-filterUnreadButtonElement.addEventListener('click', (event) => {
-    filterUnreadButtonElement.classList.add('current-filter');
-    filterAllButtonElement.classList.remove('current-filter');
-    filterGroupsButtonElement.classList.remove('current-filter');
+filterUnreadMessagesButtonElement.addEventListener('click', (event) => {
+    filterUnreadMessagesButtonElement.classList.add('current-filter');
+
+    filterAllMessagesButtonElement.classList.remove('current-filter');
+    filterGroupsMessagesButtonElement.classList.remove('current-filter');
+    filterRequestsMessagesButtonElement.classList.remove('current-filter');
 });
 
 // Filter groups messages
-filterGroupsButtonElement.addEventListener('click', (event) => {
-    filterGroupsButtonElement.classList.add('current-filter');
-    filterAllButtonElement.classList.remove('current-filter');
-    filterUnreadButtonElement.classList.remove('current-filter');
+filterGroupsMessagesButtonElement.addEventListener('click', (event) => {
+    filterGroupsMessagesButtonElement.classList.add('current-filter');
+
+    filterAllMessagesButtonElement.classList.remove('current-filter');
+    filterUnreadMessagesButtonElement.classList.remove('current-filter');
+    filterRequestsMessagesButtonElement.classList.remove('current-filter');
+});
+
+// Filter requests messages
+filterRequestsMessagesButtonElement.addEventListener('click', (event) => {
+    filterRequestsMessagesButtonElement.classList.add('current-filter');
+
+    filterAllMessagesButtonElement.classList.remove('current-filter');
+    filterUnreadMessagesButtonElement.classList.remove('current-filter');
+    filterGroupsMessagesButtonElement.classList.remove('current-filter');
+});
+
+// Filter all contacts
+filterAllContactsButtonElement.addEventListener('click', (event) => {
+    filterAllContactsButtonElement.classList.add('current-filter');
+
+    filterRequestContactsButtonElement.classList.remove('current-filter');
+});
+
+// Filter contacts requests
+filterRequestContactsButtonElement.addEventListener('click', (event) => {
+    filterRequestContactsButtonElement.classList.add('current-filter');
+
+    filterAllContactsButtonElement.classList.remove('current-filter');
 });

@@ -25,11 +25,11 @@
             </div>
             <nav>
                 <ul id="menu">
-                    <li id="open-chat-list-btn" class="menu-option active-menu-option">
+                    <li id="open-chat-list-btn" class="menu-option">
                         <img class="option-img" src="./assets/icons/message.png"/>
                         <span>Messages</span>
                     </li>
-                    <li id="open-friend-list-btn" class="menu-option active-menu-option">
+                    <li id="open-friend-list-btn" class="menu-option">
                         <img class="option-img" src="./assets/icons/users.png"/>
                         <span>Contacts</span>
                     </li>
@@ -43,10 +43,11 @@
                 <button id="new-chat-btn">+</button>
             </div>
             <div id="chat-list-wrapper" class="tabs-buffer">
-                <ul id="filters">
-                    <li><button id="filter-all-btn" class="filter-btn">All</button></li>
-                    <li><button id="filter-unread-btn" class="filter-btn">Unread</button></li>
-                    <li><button id="filter-groups-btn" class="filter-btn">Groups</button></li>
+                <ul class="filters">
+                    <li><button id="filter-all-messages-btn" class="filter-btn">All</button></li>
+                    <li><button id="filter-unread-messages-btn" class="filter-btn">Unread</button></li>
+                    <li><button id="filter-group-messages-btn" class="filter-btn">Groups</button></li>
+                    <li><button id="filter-request-messages-btn" class="filter-btn">Requests</button></li>
                 </ul>
                 <div id="chat-tabs" class="tabs-wrapper">
                     
@@ -73,15 +74,20 @@
 
                 </div>
             </div>
-            <div id="friend-list-wrapper" class="tabs-buffer tabs-wrapper">
-
-                <div class="friend-tab">
-                    <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
-                    <span class="username">Unknown sender</span>
-                </div>
-                <div class="friend-tab">
-                    <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
-                    <span class="username">Unknown sender</span>
+            <div id="friend-list-wrapper" class="tabs-buffer">
+                <ul class="filters">
+                    <li><button id="filter-all-contacts-btn" class="filter-btn">All</button></li>
+                    <li><button id="filter-request-contacts-btn" class="filter-btn">Requests</button></li>
+                </ul>
+                <div id="friend-tabs" class="tabs-wrapper">
+                    <div class="friend-tab">
+                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
+                        <span class="username">Unknown sender</span>
+                    </div>
+                    <div class="friend-tab">
+                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
+                        <span class="username">Unknown sender</span>
+                    </div>
                 </div>
                 
             </div>
