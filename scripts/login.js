@@ -1,3 +1,39 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-database.js";
+// import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-analytics.js";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBpWnewLNMbXyTJA1XmlsOCQX6VBAR-08M",
+  authDomain: "online-chat-application-cfcfc.firebaseapp.com",
+  projectId: "online-chat-application-cfcfc",
+  storageBucket: "online-chat-application-cfcfc.appspot.com",
+  messagingSenderId: "176507475474",
+  appId: "1:176507475474:web:9a9e8cecd63ae32fb82acb",
+  measurementId: "G-SG8Q89L96L"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const dataRef = ref(database, "users");
+// const analytics = getAnalytics(app); 
+
+function writeNewUserData(email, username, password) {
+    const newUserRef = push(dataRef);
+    set(newUserRef, {
+        "email": email,
+        "username": username,
+        "password": password,
+        "profile_picture": "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png",
+        "contacts": {},
+        "chats": {}
+    });
+}
+
 // Localstorage
 var storage = window.localStorage;
 
@@ -201,12 +237,16 @@ function successInputControl() {
 signUpButtonElement.addEventListener('click', event => {
     event.preventDefault();
     if (successInputControl() === true) {
-        signUpFormElement.submit();
         const username = signUpUsernameElement.value.trim();
         const email = signUpEmailElement.value.trim();
         const password = signUpPasswordElement.value.trim();
-        storage.setItem(email, JSON.stringify([username, email, password]));
         
+        // Writing user to storage
+        writeNewUserData(email, username, password);
+        storage.setItem(email, JSON.stringify([email, username, password]));
+        
+        signUpFormElement.submit();
+
         // Setting inputs to default values
         signUpUsernameElement.value = '';
         signUpEmailElement.value = '';
@@ -265,7 +305,7 @@ function checkEmailAndPass() {
     const inputEmail = loginEmailElement.value.trim();
     const inputPassword = loginPasswordElement.value.trim();
     const data = JSON.parse(storage.getItem(`${inputEmail}`));
-    if ((data[1] === inputEmail) && (data[2] === inputPassword)) {
+    if ((data[0] === inputEmail) && (data[2] === inputPassword)) {
         return true;
     }
     return false;

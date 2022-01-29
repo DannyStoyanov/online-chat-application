@@ -61,7 +61,7 @@ body {
     width: 25rem;
     max-width: 100%;
 
-    background-color: #FFFFFF;
+    background-color: #E0ECDE;
 }
 
 .subwrapper {
@@ -102,6 +102,7 @@ body {
     border: none;
     border-bottom:2px solid #2C6975;
     border-radius: 1px;
+    font-weight: bold;
 }
 
 .input-control input:focus {
