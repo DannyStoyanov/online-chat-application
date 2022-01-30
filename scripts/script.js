@@ -20,6 +20,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const dataRef = ref(database, "users/");
+const currentUser = {};
 // const analytics = getAnalytics(app);
 
 const friendListElement = document.getElementById('friend-list-wrapper');
@@ -33,6 +34,10 @@ const filterGroupsMessagesButtonElement = document.getElementById('filter-group-
 const filterRequestsMessagesButtonElement = document.getElementById('filter-request-messages-btn');
 const filterAllContactsButtonElement = document.getElementById('filter-all-contacts-btn');
 const filterRequestContactsButtonElement = document.getElementById('filter-request-contacts-btn');
+const searchInputElement = document.getElementById('searchfield');
+const searchResultBufferElement = document.getElementById('search-results-buffer');
+const escapeSearchResultsButtonElement = document.getElementById('escape-search-results-btn');
+const addFriendButtonElements = document.getElementsByClassName('add-friend-btn');
 
 // Localstorage
 var storage = window.localStorage;
@@ -135,7 +140,7 @@ function logOut() {
     window.location.href = "index.html";
 }
 
-// Chat settings:
+// Chat filter settings:
 
 // Filter all messages
 filterAllMessagesButtonElement.addEventListener('click', (event) => {
@@ -173,6 +178,8 @@ filterRequestsMessagesButtonElement.addEventListener('click', (event) => {
     filterGroupsMessagesButtonElement.classList.remove('current-filter');
 });
 
+// Contact filter settings
+
 // Filter all contacts
 filterAllContactsButtonElement.addEventListener('click', (event) => {
     filterAllContactsButtonElement.classList.add('current-filter');
@@ -186,3 +193,81 @@ filterRequestContactsButtonElement.addEventListener('click', (event) => {
 
     filterAllContactsButtonElement.classList.remove('current-filter');
 });
+
+// Search friends
+searchInputElement.addEventListener('change', (event) => { // 'keyup'
+    const dbRef = ref(getDatabase());
+    var data = {};
+    searchResultBufferElement.innerHTML = ``;
+    get(child(dbRef, `users/`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            data = snapshot.val();
+            for (var key in data) {
+                if((data[key].username === searchInputElement.value.trim()) && data[key] !== currentUser) {
+                    searchResultBufferElement.innerHTML += `
+                    <div class="search-contact-tab">
+                        <div class="image-username-wrapper">
+                            <img src="${data[key].profile_picture}" class="user-profile-pic tab-element" alt="user_logo"/>
+                            <span class="username tab-element">${data[key].username}</span>
+                        </div>
+                        <button class="add-friend-btn tab-element">Add</button>
+                    </div>
+                    `;
+                }
+            }
+            if(searchResultBufferElement.innerHTML === ``) {
+                searchResultBufferElement.innerHTML = `<span>No results</span>`;
+            }
+        } else {
+            console.log("No data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+});
+
+// Send friend request button
+searchResultBufferElement.addEventListener("click", event => {
+    const element = event.target;
+    if(element.classList.contains("add-friend-btn")) {
+        const contactTabemElement = element.parentElement;
+        const username = contactTabemElement.querySelector("span").textContent.trim();
+        const profile_picture = contactTabemElement.querySelector("img").getAttribute("src");
+        const senderKey = getCurrentUserKey();
+        sendFriendRequest(username, profile_picture, senderKey);
+    }
+});
+
+// Send friend request to exact user
+function sendFriendRequest(username, profile_picture, senderKey) {
+    var data = {};
+    get(child(dbRef, `users/`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            data = snapshot.val();
+            for(var key in data) {
+                if((data[key].username === username) && (data[key].profile_picture === profile_picture)) {
+                    get(child(dbRef, 'users/' + key)).then((user) => {
+                        var contacts = user.val()["contacts"];
+                        contacts[`${senderKey}`]=false;
+                        const database = ref(getDatabase());
+                        const dataRef = ref(database, "users/"+key);
+                        // REWORK HERE
+                        console.log("done");
+                    });
+                }
+            }
+        } else {
+            console.log("No data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
+/*
+if (sessionStorage.user) {
+    console.log(1)
+} else {
+    console.log('user not exist in the session storage')
+}
+*/

@@ -41,8 +41,17 @@ function writeNewUserData(email, username, password) {
         "username": username,
         "password": password,
         "profile_picture": "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png",
-        "contacts": {},
-        "chats": {}
+        "contacts": {
+            "0": false,
+        },
+        "chats": {
+            "0": false,
+        }
+    }).then(() => {
+        // console.log("Data saved successfully");
+      })
+      .catch((error) => {
+        // console.log("Data not saved");
     });
     return newUserRef.key;
 }
