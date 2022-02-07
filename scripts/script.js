@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js";
-import { getDatabase, ref, child, get } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-database.js";
+import { getDatabase, ref, update, child, get } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-database.js";
 // import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-analytics.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -19,7 +19,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
-const dataRef = ref(database, "users/");
+const usersRef = ref(database, "users/");
 const currentUser = {};
 // const analytics = getAnalytics(app);
 
@@ -203,7 +203,7 @@ searchInputElement.addEventListener('change', (event) => { // 'keyup'
         if (snapshot.exists()) {
             data = snapshot.val();
             for (var key in data) {
-                if((data[key].username === searchInputElement.value.trim()) && data[key] !== currentUser) {
+                if ((data[key].username === searchInputElement.value.trim()) && data[key] !== currentUser) {
                     searchResultBufferElement.innerHTML += `
                     <div class="search-contact-tab">
                         <div class="image-username-wrapper">
@@ -215,7 +215,7 @@ searchInputElement.addEventListener('change', (event) => { // 'keyup'
                     `;
                 }
             }
-            if(searchResultBufferElement.innerHTML === ``) {
+            if (searchResultBufferElement.innerHTML === ``) {
                 searchResultBufferElement.innerHTML = `<span>No results</span>`;
             }
         } else {
@@ -229,7 +229,7 @@ searchInputElement.addEventListener('change', (event) => { // 'keyup'
 // Send friend request button
 searchResultBufferElement.addEventListener("click", event => {
     const element = event.target;
-    if(element.classList.contains("add-friend-btn")) {
+    if (element.classList.contains("add-friend-btn")) {
         const contactTabemElement = element.parentElement;
         const username = contactTabemElement.querySelector("span").textContent.trim();
         const profile_picture = contactTabemElement.querySelector("img").getAttribute("src");
@@ -240,23 +240,22 @@ searchResultBufferElement.addEventListener("click", event => {
 
 // Send friend request to exact user
 function sendFriendRequest(username, profile_picture, senderKey) {
-    var data = {};
-    get(child(dbRef, `users/`)).then((snapshot) => {
+    var userData = {};
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, 'users/')).then((snapshot) => {
         if (snapshot.exists()) {
-            data = snapshot.val();
-            for(var key in data) {
-                if((data[key].username === username) && (data[key].profile_picture === profile_picture)) {
-                    get(child(dbRef, 'users/' + key)).then((user) => {
-                        var contacts = user.val()["contacts"];
-                        contacts[`${senderKey}`]=false;
-                        const database = ref(getDatabase());
-                        const dataRef = ref(database, "users/"+key);
-                        // REWORK HERE
-                        console.log("done");
-                    });
+            snapshot.forEach((user) => {
+                const userKey = user.key;
+                const userData = user.val();
+                if ((userData.username === username) && (userData.profile_picture === profile_picture)) {
+                    // CHECK IF SENDER = INVITATION END POINT
+                    userData.contacts[`${senderKey}`] = false;
+                    contactsRef = ref(dbRef, 'users/' + userKey + 'contacts');
+                    console.log(contactsRef); // ^^^^^^^^^^^^^^^^^^^^^^^^^^ ???
                 }
-            }
-        } else {
+            });
+        }
+        else {
             console.log("No data available");
         }
     }).catch((error) => {
