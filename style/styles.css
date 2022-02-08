@@ -272,7 +272,7 @@ ul {
 
 #search-results-buffer {
     position: fixed;
-    top: 17.5%;
+    top: 18%;
     left: 23.5%;
     width: 17.5%;
     height: auto;
@@ -290,7 +290,7 @@ ul {
 .escape-search-results-btn {
     position: relative;
     top: 0%;
-    right: 0%;
+    right: -40%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -303,6 +303,9 @@ ul {
     border: none;
     cursor: pointer;
     margin: 5px;
+    padding: 5px;
+    width: 10%;
+    height: 20px;
 }
 
 .search-contact-tab {
@@ -466,6 +469,13 @@ ul {
 
 .friend-tab .username {
     margin-left: 1rem;
+}
+
+.no-search-results {
+    color:#E0ECDE;
+    font-weight: bold;
+    font-size: 1em;
+    margin: 5px;
 }
 
 #chat-wrapper {

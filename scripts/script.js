@@ -49,6 +49,7 @@ window.addEventListener('load', (event) => {
     friendListButtonElement.classList.remove('active-menu-option');
     chatListButtonElement.classList.add('active-menu-option');
 
+    // Search results
     searchResultBufferWrapperElement.classList.add('hidden');
 
     // Load current user data
@@ -93,6 +94,7 @@ function loadCurrentUser() {
     });
 }
 
+//
 function loadCurrentUserData(data) {
     const profilePictureElement = document.getElementById('user-profile-pic');
     const usernameElement = document.getElementById('profile-username');
@@ -198,7 +200,7 @@ filterRequestContactsButtonElement.addEventListener('click', (event) => {
 });
 
 // Search friends
-searchInputElement.addEventListener('change', (event) => { // 'keyup'
+searchInputElement.addEventListener('change', (event) => {
     const dbRef = ref(getDatabase());
     var data = {};
     var anySearchResults = false;
@@ -224,7 +226,7 @@ searchInputElement.addEventListener('change', (event) => { // 'keyup'
                 }
             }
             if (anySearchResults === false) {
-                searchResultBufferElement.innerHTML += `<span>No results</span>`;
+                searchResultBufferElement.innerHTML += `<span class="no-search-results">There is no user: ${searchInputElement.value.trim()}</span>`;
             }
         } else {
             console.log("No data available");
