@@ -21,6 +21,7 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const usersRef = ref(database, "users/");
 const currentUser = {};
+
 // const analytics = getAnalytics(app);
 
 const friendListElement = document.getElementById('friend-list-wrapper');
@@ -39,6 +40,7 @@ const searchResultBufferElement = document.getElementById('search-results-buffer
 const searchResultBufferWrapperElement = document.getElementById('search-results-buffer-wrapper');
 const escapeSearchResultsButtonElement = document.getElementsByClassName('escape-search-results-btn')[0];
 const addFriendButtonElements = document.getElementsByClassName('add-friend-btn');
+const friendTabsBufferElement = document.getElementById('friend-tabs');
 
 // Localstorage
 var storage = window.localStorage;
@@ -195,6 +197,7 @@ filterAllContactsButtonElement.addEventListener('click', (event) => {
 // Filter contacts requests
 filterRequestContactsButtonElement.addEventListener('click', (event) => {
     filterRequestContactsButtonElement.classList.add('current-filter');
+    showFriendRequests();
 
     filterAllContactsButtonElement.classList.remove('current-filter');
 });
@@ -210,9 +213,10 @@ searchInputElement.addEventListener('change', (event) => {
     `;
     get(child(dbRef, `users/`)).then((snapshot) => {
         if (snapshot.exists()) {
+            const currentUserKey = getCurrentUserKey();
             data = snapshot.val();
             for (var key in data) {
-                if ((data[key].username === searchInputElement.value.trim()) && data[key] !== currentUser) {
+                if ((data[key].username === searchInputElement.value.trim()) && key !== currentUserKey) {
                     anySearchResults = true;
                     searchResultBufferElement.innerHTML += `
                     <div class="search-contact-tab">
@@ -243,8 +247,8 @@ searchResultBufferElement.addEventListener("click", event => {
         const contactTabElement = element.parentElement;
         const username = contactTabElement.querySelector("span").textContent.trim();
         const profile_picture = contactTabElement.querySelector("img").getAttribute("src");
-        const senderKey = getCurrentUserKey();
-        sendFriendRequest(username, profile_picture, senderKey);
+        const currentUserKey = getCurrentUserKey();
+        sendFriendRequest(username, profile_picture, currentUserKey);
         contactTabElement.classList.add("hidden");
     }
     if (element.classList.contains("escape-search-results-btn")) {
@@ -254,18 +258,17 @@ searchResultBufferElement.addEventListener("click", event => {
 });
 
 // Send friend request to exact user
-function sendFriendRequest(username, profile_picture, senderKey) {
+function sendFriendRequest(username, profile_picture, currentUserKey) {
     const dbRef = ref(getDatabase());
     get(child(dbRef, 'users/')).then((snapshot) => {
         if (snapshot.exists()) {
             snapshot.forEach((user) => {
                 const userKey = user.key;
                 const userData = user.val();
-                if ((userData.username === username) && (userData.profile_picture === profile_picture)) {
-                    // CHECK IF SENDER = INVITATION END POINT
-                    userData.contacts[`${senderKey}`] = false;
+                if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
+                    userData.contacts[`${currentUserKey}`] = false;
                     const updates = {};
-                    updates["users/"+userKey+"/contacts/"] = userData.contacts;
+                    updates["users/" + userKey + "/contacts/"] = userData.contacts;
                     update(ref(database), updates);
                 }
             });
@@ -292,6 +295,119 @@ function getUser(userId) {
         console.error(error);
     });
     return user;
+}
+
+// Show friend requests
+function showFriendRequests() {
+    friendTabsBufferElement.innerHTML = ``;
+    const currentUserKey = getCurrentUserKey();
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, 'users/')).then((user) => {
+        if (user.exists()) {
+            const data = user.val()[currentUserKey]['contacts'];
+            for (var userId in data) {
+                const isFriend = data[userId];
+                if (isFriend === false) {
+                    friendTabsBufferElement.innerHTML += `
+                    <div class="friend-tab">
+                        <img src="${user.val()[userId].profile_picture}" class="user-profile-pic" alt="user_logo" />
+                        <span class="username">${user.val()[userId].username}</span>
+                        <button class="friend-request-option-btn accept-friend-request-btn">Accept</button>
+                        <button class="friend-request-option-btn decline-friend-request-btn">Decline</button>
+                    </div>
+                    `;
+                }
+            }
+        }
+        else {
+            console.log("No data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
+// Requests management
+friendTabsBufferElement.addEventListener("click", event => {
+    const element = event.target;
+
+    const requestTabElement = element.parentElement;
+    const username = requestTabElement.querySelector("span").textContent.trim();
+    const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
+    const currentUser = getCurrentUserKey();
+    
+    if (element.classList.contains("accept-friend-request-btn")) {
+        acceptFriendRequest(username, profile_picture, currentUser);
+    }
+    if (element.classList.contains("decline-friend-request-btn")) {
+        declineFriendRequest(username, profile_picture, currentUser);
+    }
+    requestTabElement.classList.add("hidden");
+});
+
+// Accept friend request
+function acceptFriendRequest(username, profile_picture, currentUserKey) {
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, `users/`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            snapshot.forEach((user) => {
+                const userKey = user.key;
+                const userData = user.val();
+                if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
+                    // CHECK IF SENDER = RECEIVER
+                    userData.contacts[`${currentUserKey}`] = true;
+                    var updateSender = {};
+                    updateSender["users/" + userKey + "/contacts/"] = userData.contacts;
+                    update(ref(database), updateSender);
+                    get(child(dbRef, `users/` + currentUserKey)).then((acceptingUser) => {
+                        if (acceptingUser.exists()) {
+                            const acceptedContact =  acceptingUser.val().contacts;
+                            acceptedContact[`${userKey}`] = true;
+                            var updateReceiver = {};
+                            updateReceiver["users/" + currentUserKey + "/contacts/"] = acceptedContact;
+                            update(ref(database), updateReceiver);
+                        }
+                    }).catch((error) => {
+                        console.error(error);
+                    });
+                }
+            });
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
+// Decline friend request
+function declineFriendRequest(username, profile_picture, currentUserKey) {
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, `users/`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            snapshot.forEach((user) => {
+                const userKey = user.key;
+                const userData = user.val();
+                if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
+                    delete userData.contacts[`${currentUserKey}`];
+                    var updateSender = {};
+                    updateSender["users/" + userKey + "/contacts/"] = userData.contacts;
+                    update(ref(database), updateSender);
+                    get(child(dbRef, `users/` + currentUserKey)).then((acceptingUser) => {
+                        if (acceptingUser.exists()) {
+                            const acceptedContact =  acceptingUser.val().contacts;
+                            delete acceptedContact[`${userKey}`];
+                            var updateReceiver = {};
+                            updateReceiver["users/" + currentUserKey + "/contacts/"] = acceptedContact;
+                            update(ref(database), updateReceiver);
+                        }
+                    }).catch((error) => {
+                        console.error(error);
+                    });
+                }
+            });
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
 }
 
 /*

@@ -448,7 +448,7 @@ ul {
 }
 
 .friend-tab {
-    min-width: 90%;
+    width: 90%;
     min-height: 5rem;
     display: flex;
     flex-direction: row;
@@ -469,6 +469,30 @@ ul {
 
 .friend-tab .username {
     margin-left: 1rem;
+}
+
+.friend-request-option-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25%;
+    height: 30px;
+    border-radius: 20px;
+    background: #6BB2AD;
+    font-size: 0.75em;
+    color: #2C6975;
+    background: transparent;
+    border: 1px solid #2C6975;
+    cursor: pointer;
+    margin: 5px;
+    padding: 5px;
+    box-shadow: #2C6975 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+}
+
+.friend-request-option-btn:hover {
+    background: #2C6975;
+    color: #E0ECDE;
+    transition: 0.1s;
 }
 
 .no-search-results {
