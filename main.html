@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style/styles.css">
     <link rel="stylesheet" href="./style/all.min.css">
-    <link rel="shortcut icon" type="image/png" href="./assets/logo.png"/>
+    <link rel="shortcut icon" type="image/png" href="./assets/logo.png" />
     <script src="./scripts/script.js" type="module"></script>
     <title>Fluffster</title>
 </head>
+
 <body>
     <div id="main-wrapper">
         <section id="nav-wrapper">
@@ -18,7 +20,7 @@
                 <h1 id="title">Fluffster</h1>
             </header>
             <div id="profile">
-                <img src="./assets/icons/default_profile.png" id="user-profile-pic" alt="user-profile-picture"/>
+                <img src="./assets/icons/default_profile.png" id="user-profile-pic" alt="user-profile-picture" />
                 <span id="profile-username"></span>
                 <span id="profile-email"></span>
                 <button id="log-out-btn">Log Out</button>
@@ -26,11 +28,11 @@
             <nav>
                 <ul id="menu">
                     <li id="open-chat-list-btn" class="menu-option">
-                        <img class="option-img" src="./assets/icons/message.png"/>
+                        <img class="option-img" src="./assets/icons/message.png" />
                         <span>Messages</span>
                     </li>
                     <li id="open-friend-list-btn" class="menu-option">
-                        <img class="option-img" src="./assets/icons/users.png"/>
+                        <img class="option-img" src="./assets/icons/users.png" />
                         <span>Contacts</span>
                     </li>
                 </ul>
@@ -41,8 +43,9 @@
             <div id="new-chat-wrapper">
                 <input id="searchfield" type="text" placeholder="Search" />
                 <div id="search-results-buffer-wrapper">
-                    <!-- <button id="escape-search-results-btn">x</button> -->
-                    <div id="search-results-buffer"></div>
+                    <div id="search-results-buffer">
+                        <button class="escape-search-results-btn">x</button>
+                    </div>
                 </div>
                 <button id="new-chat-btn">+</button>
             </div>
@@ -54,9 +57,9 @@
                     <li><button id="filter-request-messages-btn" class="filter-btn">Requests</button></li>
                 </ul>
                 <div id="chat-tabs" class="tabs-wrapper">
-                    
+
                     <div class="chat-tab">
-                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
+                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo" />
                         <div class="chat-preview">
                             <div class="message-info">
                                 <span class="username">Unkown sender</span>
@@ -66,7 +69,7 @@
                         </div>
                     </div>
                     <div class="chat-tab">
-                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
+                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo" />
                         <div class="chat-preview">
                             <div class="message-info">
                                 <span class="username">Unkown sender</span>
@@ -85,22 +88,23 @@
                 </ul>
                 <div id="friend-tabs" class="tabs-wrapper">
                     <div class="friend-tab">
-                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
+                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo" />
                         <span class="username">Unknown sender</span>
                     </div>
                     <div class="friend-tab">
-                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo"/>
+                        <img src="./assets/icons/default_profile.png" class="user-profile-pic" alt="user_logo" />
                         <span class="username">Unknown sender</span>
                     </div>
                 </div>
-                
+
             </div>
         </section>
         <div id="chat-wrapper">
             <div id="chat-room">
                 <div id="chat-room-header">
                     <div>
-                        <img src="./assets/icons/default_profile.png" alt="user-profile-pic" id="user-profile-pic-chat"/>
+                        <img src="./assets/icons/default_profile.png" alt="user-profile-pic"
+                            id="user-profile-pic-chat" />
                     </div>
                     <div id="chat-room-name">
                         <span>Unknown sender</span>
@@ -111,10 +115,12 @@
                 <div id="chat-window"></div>
                 <div id="chat-input-field">
                     <input id="message-input" type="text">
-                    <button id="send-message-btn"><img id="send-message-icon" src="assets/icons/send_message.png" alt="send-message-icon"/></button>
+                    <button id="send-message-btn"><img id="send-message-icon" src="assets/icons/send_message.png"
+                            alt="send-message-icon" /></button>
                 </div>
             </div>
         </div>
     </div>
 </body>
+
 </html>

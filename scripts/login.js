@@ -36,16 +36,17 @@ const dataRef = ref(database, "users/");
 
 function writeNewUserData(email, username, password) {
     const newUserRef = push(dataRef);
-    set(ref(database, 'users/' + newUserRef.key), {
+    const userId = newUserRef.key;
+    set(ref(database, 'users/' + userId), {
         "email": email,
         "username": username,
         "password": password,
         "profile_picture": "https://i.pinimg.com/originals/0c/3b/3a/0c3b3adb1a7530892e55ef36d3be6cb8.png",
         "contacts": {
-            "0": false,
+            [userId]: false,
         },
         "chats": {
-            "0": false,
+            
         }
     }).then(() => {
         // console.log("Data saved successfully");

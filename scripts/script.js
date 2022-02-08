@@ -36,7 +36,8 @@ const filterAllContactsButtonElement = document.getElementById('filter-all-conta
 const filterRequestContactsButtonElement = document.getElementById('filter-request-contacts-btn');
 const searchInputElement = document.getElementById('searchfield');
 const searchResultBufferElement = document.getElementById('search-results-buffer');
-const escapeSearchResultsButtonElement = document.getElementById('escape-search-results-btn');
+const searchResultBufferWrapperElement = document.getElementById('search-results-buffer-wrapper');
+const escapeSearchResultsButtonElement = document.getElementsByClassName('escape-search-results-btn')[0];
 const addFriendButtonElements = document.getElementsByClassName('add-friend-btn');
 
 // Localstorage
@@ -47,6 +48,8 @@ window.addEventListener('load', (event) => {
     friendListElement.classList.add('hidden');
     friendListButtonElement.classList.remove('active-menu-option');
     chatListButtonElement.classList.add('active-menu-option');
+
+    searchResultBufferWrapperElement.classList.add('hidden');
 
     // Load current user data
     loadCurrentUser();
@@ -198,12 +201,17 @@ filterRequestContactsButtonElement.addEventListener('click', (event) => {
 searchInputElement.addEventListener('change', (event) => { // 'keyup'
     const dbRef = ref(getDatabase());
     var data = {};
-    searchResultBufferElement.innerHTML = ``;
+    var anySearchResults = false;
+    searchResultBufferWrapperElement.classList.remove("hidden");
+    searchResultBufferElement.innerHTML = `
+    <button class="escape-search-results-btn">x</button>
+    `;
     get(child(dbRef, `users/`)).then((snapshot) => {
         if (snapshot.exists()) {
             data = snapshot.val();
             for (var key in data) {
                 if ((data[key].username === searchInputElement.value.trim()) && data[key] !== currentUser) {
+                    anySearchResults = true;
                     searchResultBufferElement.innerHTML += `
                     <div class="search-contact-tab">
                         <div class="image-username-wrapper">
@@ -215,8 +223,8 @@ searchInputElement.addEventListener('change', (event) => { // 'keyup'
                     `;
                 }
             }
-            if (searchResultBufferElement.innerHTML === ``) {
-                searchResultBufferElement.innerHTML = `<span>No results</span>`;
+            if (anySearchResults === false) {
+                searchResultBufferElement.innerHTML += `<span>No results</span>`;
             }
         } else {
             console.log("No data available");
@@ -230,17 +238,21 @@ searchInputElement.addEventListener('change', (event) => { // 'keyup'
 searchResultBufferElement.addEventListener("click", event => {
     const element = event.target;
     if (element.classList.contains("add-friend-btn")) {
-        const contactTabemElement = element.parentElement;
-        const username = contactTabemElement.querySelector("span").textContent.trim();
-        const profile_picture = contactTabemElement.querySelector("img").getAttribute("src");
+        const contactTabElement = element.parentElement;
+        const username = contactTabElement.querySelector("span").textContent.trim();
+        const profile_picture = contactTabElement.querySelector("img").getAttribute("src");
         const senderKey = getCurrentUserKey();
         sendFriendRequest(username, profile_picture, senderKey);
+        contactTabElement.classList.add("hidden");
+    }
+    if (element.classList.contains("escape-search-results-btn")) {
+        searchResultBufferWrapperElement.classList.add('hidden');
+        searchInputElement.value = '';
     }
 });
 
 // Send friend request to exact user
 function sendFriendRequest(username, profile_picture, senderKey) {
-    var userData = {};
     const dbRef = ref(getDatabase());
     get(child(dbRef, 'users/')).then((snapshot) => {
         if (snapshot.exists()) {
@@ -250,8 +262,9 @@ function sendFriendRequest(username, profile_picture, senderKey) {
                 if ((userData.username === username) && (userData.profile_picture === profile_picture)) {
                     // CHECK IF SENDER = INVITATION END POINT
                     userData.contacts[`${senderKey}`] = false;
-                    contactsRef = ref(dbRef, 'users/' + userKey + 'contacts');
-                    console.log(contactsRef); // ^^^^^^^^^^^^^^^^^^^^^^^^^^ ???
+                    const updates = {};
+                    updates["users/"+userKey+"/contacts/"] = userData.contacts;
+                    update(ref(database), updates);
                 }
             });
         }
@@ -261,6 +274,22 @@ function sendFriendRequest(username, profile_picture, senderKey) {
     }).catch((error) => {
         console.error(error);
     });
+}
+
+var user = {};
+function getUser(userId) {
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, 'users/')).then((snapshot) => {
+        if (snapshot.exists()) {
+            user = snapshot.val()[`${userId}`];
+        }
+        else {
+            console.log("No such user data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+    return user;
 }
 
 /*
