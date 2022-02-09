@@ -382,6 +382,20 @@ ul {
     color: #2C6975;
 }
 
+#friend-requests-count {
+    position: absolute;
+    top: 21.5%;
+    left: 35%;
+    width: 12.5px;
+    height: 12.5px;
+    font-size: 0.55em;
+    text-align: center;
+    color:#CDE0C9;
+    border: 1px solid #FF0000;
+    border-radius: 100%;
+    background-color: #FF0000;
+}
+
 .filter-btn.current-filter {
     border-bottom: 2px solid #2C6975;
 }
@@ -511,7 +525,7 @@ ul {
 }
 
 .friend-dropdown-settings {
-    border: 1px solid red;
+    border: 1px solid #2C6975;
     position: relative;
     top: 15px;
     right: -30px;
@@ -519,7 +533,7 @@ ul {
     flex-direction: column;
     width: 60%;
     height: auto;
-    z-index: 1;
+    z-index: 0.9;
 }
 
 .friend-tab-settings {
@@ -630,6 +644,9 @@ ul {
 }
 
 .hidden {
-    /* visibility: hidden; */
     display: none;
+}
+
+.hidden-visibility {
+    visibility: hidden;
 }

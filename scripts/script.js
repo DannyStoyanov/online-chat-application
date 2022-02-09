@@ -41,7 +41,7 @@ const searchResultBufferWrapperElement = document.getElementById('search-results
 const escapeSearchResultsButtonElement = document.getElementsByClassName('escape-search-results-btn')[0];
 const addFriendButtonElements = document.getElementsByClassName('add-friend-btn');
 const friendTabsBufferElement = document.getElementById('friend-tabs');
-var newChatButtonElement;
+const friendRequestsCountElement = document.getElementById('friend-requests-count');
 
 // Localstorage
 var storage = window.localStorage;
@@ -60,6 +60,9 @@ window.addEventListener('load', (event) => {
 
     // Load current user data
     loadCurrentUser();
+
+    // Check friend requests
+    countContactRequests();
 
     // Chat default filter
     filterAllMessagesButtonElement.classList.add('current-filter');
@@ -272,10 +275,12 @@ function sendFriendRequest(username, profile_picture, currentUserKey) {
                 const userKey = user.key;
                 const userData = user.val();
                 if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
-                    userData.contacts[`${currentUserKey}`] = false;
-                    const updates = {};
-                    updates["users/" + userKey + "/contacts/"] = userData.contacts;
-                    update(ref(database), updates);
+                    if (userData.contacts[`${currentUserKey}`] !== true) {
+                        userData.contacts[`${currentUserKey}`] = false;
+                        const updates = {};
+                        updates["users/" + userKey + "/contacts/"] = userData.contacts;
+                        update(ref(database), updates);
+                    }
                 }
             });
         }
@@ -333,6 +338,32 @@ function showFriendRequests() {
     });
 }
 
+function countContactRequests() {
+    const currentUserKey = getCurrentUserKey();
+    const dbRef = ref(getDatabase());
+    var requestsCount = 0;
+    get(child(dbRef, `users/` + currentUserKey)).then((currUser) => {
+        if (currUser.exists()) {
+            const contacts = currUser.val()["contacts"];
+            for (var userId in contacts) {
+                const isFriend = contacts[userId];
+                if (isFriend === false) {
+                    ++requestsCount;
+                }
+            }
+            if (requestsCount !== 0) {
+                friendRequestsCountElement.classList.remove("hidden");
+                friendRequestsCountElement.innerText = requestsCount;
+            }
+            else {
+                friendRequestsCountElement.classList.add("hidden");
+            }
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
 // Contact requests management
 friendTabsBufferElement.addEventListener("click", event => {
     const element = event.target;
@@ -343,6 +374,7 @@ friendTabsBufferElement.addEventListener("click", event => {
         const currentUser = getCurrentUserKey();
         acceptFriendRequest(username, profile_picture, currentUser);
         requestTabElement.classList.add("hidden");
+        countContactRequests();
     }
     if (element.classList.contains("decline-friend-request-btn")) {
         const requestTabElement = element.parentElement;
@@ -351,6 +383,7 @@ friendTabsBufferElement.addEventListener("click", event => {
         const currentUser = getCurrentUserKey();
         declineFriendRequest(username, profile_picture, currentUser);
         requestTabElement.classList.add("hidden");
+        countContactRequests();
     }
 });
 
@@ -455,11 +488,11 @@ function showAllFriends() {
 
 friendTabsBufferElement.addEventListener("click", (event) => {
     const element = event.target;
-    if(element.classList.contains('three-dots-img')) {
+    if (element.classList.contains('three-dots-img')) {
         const buttonElement = element.parentElement;
         const friendTabElement = buttonElement.parentElement;
         const dropdownElement = friendTabElement.querySelector(".friend-dropdown-settings");
-        if(dropdownElement.classList.contains('hidden')) {
+        if (dropdownElement.classList.contains('hidden')) {
             dropdownElement.classList.remove('hidden');
             // const ulElement = dropdownElement.children[0];
             // const newChatButtonElement = ulElement.children[0];
@@ -469,10 +502,10 @@ friendTabsBufferElement.addEventListener("click", (event) => {
             dropdownElement.classList.add('hidden');
         }
     }
-    if(element.classList.contains('new-chat-btn')) {
+    if (element.classList.contains('new-chat-btn')) {
         newChat();
     }
-    if(element.classList.contains('remove-friend-btn')) {
+    if (element.classList.contains('remove-friend-btn')) {
         const ulElement = element.parentElement;
         const dropdownElement = ulElement.parentElement;
         const friendTabElement = dropdownElement.parentElement;
