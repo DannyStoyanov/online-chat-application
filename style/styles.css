@@ -308,6 +308,20 @@ ul {
     height: 20px;
 }
 
+.friend-settings-btn {
+    position: relative;
+    top: -25px;
+    right: 5px;
+    background: transparent;
+    border: none;
+    cursor:pointer;
+}
+
+.three-dots-img {
+    width: 30px;
+    height: 30px;
+}
+
 .search-contact-tab {
     width: 90%;
     height: 5rem;
@@ -493,6 +507,31 @@ ul {
     background: #2C6975;
     color: #E0ECDE;
     transition: 0.1s;
+}
+
+.friend-dropdown-settings {
+    border: 1px solid red;
+    position: relative;
+    top: 15px;
+    right: -30px;
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    height: auto;
+    z-index: 1;
+}
+
+.friend-tab-settings {
+    list-style: none;
+    width: 100%;
+    height: 100%;
+}
+
+.friend-setting-option:hover {
+    background: #CDE0C9;
+    color: #2C6975;
+    transition: 0.25s;
+    cursor: pointer;
 }
 
 .no-search-results {

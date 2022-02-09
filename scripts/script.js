@@ -41,13 +41,17 @@ const searchResultBufferWrapperElement = document.getElementById('search-results
 const escapeSearchResultsButtonElement = document.getElementsByClassName('escape-search-results-btn')[0];
 const addFriendButtonElements = document.getElementsByClassName('add-friend-btn');
 const friendTabsBufferElement = document.getElementById('friend-tabs');
+var newChatButtonElement;
 
 // Localstorage
 var storage = window.localStorage;
 
 // Default onload page state
 window.addEventListener('load', (event) => {
-    friendListElement.classList.add('hidden');
+    // friendListElement.classList.add('hidden'); // add
+    chatListElement.classList.add('hidden'); // remove after changes
+    showAllFriends(); // remove after changes
+
     friendListButtonElement.classList.remove('active-menu-option');
     chatListButtonElement.classList.add('active-menu-option');
 
@@ -121,6 +125,7 @@ chatListButtonElement.addEventListener('click', (event) => {
 friendListButtonElement.addEventListener('click', (event) => {
     friendListButtonElement.classList.add('active-menu-option');
     chatListButtonElement.classList.remove('active-menu-option');
+    showAllFriends();
 
     friendListElement.classList.remove('hidden');
     chatListElement.classList.add('hidden');
@@ -190,6 +195,7 @@ filterRequestsMessagesButtonElement.addEventListener('click', (event) => {
 // Filter all contacts
 filterAllContactsButtonElement.addEventListener('click', (event) => {
     filterAllContactsButtonElement.classList.add('current-filter');
+    showAllFriends();
 
     filterRequestContactsButtonElement.classList.remove('current-filter');
 });
@@ -257,7 +263,7 @@ searchResultBufferElement.addEventListener("click", event => {
     }
 });
 
-// Send friend request to exact user
+// Send friend request to user
 function sendFriendRequest(username, profile_picture, currentUserKey) {
     const dbRef = ref(getDatabase());
     get(child(dbRef, 'users/')).then((snapshot) => {
@@ -327,22 +333,25 @@ function showFriendRequests() {
     });
 }
 
-// Requests management
+// Contact requests management
 friendTabsBufferElement.addEventListener("click", event => {
     const element = event.target;
-
-    const requestTabElement = element.parentElement;
-    const username = requestTabElement.querySelector("span").textContent.trim();
-    const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
-    const currentUser = getCurrentUserKey();
-    
     if (element.classList.contains("accept-friend-request-btn")) {
+        const requestTabElement = element.parentElement;
+        const username = requestTabElement.querySelector("span").textContent.trim();
+        const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
+        const currentUser = getCurrentUserKey();
         acceptFriendRequest(username, profile_picture, currentUser);
+        requestTabElement.classList.add("hidden");
     }
     if (element.classList.contains("decline-friend-request-btn")) {
+        const requestTabElement = element.parentElement;
+        const username = requestTabElement.querySelector("span").textContent.trim();
+        const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
+        const currentUser = getCurrentUserKey();
         declineFriendRequest(username, profile_picture, currentUser);
+        requestTabElement.classList.add("hidden");
     }
-    requestTabElement.classList.add("hidden");
 });
 
 // Accept friend request
@@ -361,7 +370,7 @@ function acceptFriendRequest(username, profile_picture, currentUserKey) {
                     update(ref(database), updateSender);
                     get(child(dbRef, `users/` + currentUserKey)).then((acceptingUser) => {
                         if (acceptingUser.exists()) {
-                            const acceptedContact =  acceptingUser.val().contacts;
+                            const acceptedContact = acceptingUser.val().contacts;
                             acceptedContact[`${userKey}`] = true;
                             var updateReceiver = {};
                             updateReceiver["users/" + currentUserKey + "/contacts/"] = acceptedContact;
@@ -393,7 +402,7 @@ function declineFriendRequest(username, profile_picture, currentUserKey) {
                     update(ref(database), updateSender);
                     get(child(dbRef, `users/` + currentUserKey)).then((acceptingUser) => {
                         if (acceptingUser.exists()) {
-                            const acceptedContact =  acceptingUser.val().contacts;
+                            const acceptedContact = acceptingUser.val().contacts;
                             delete acceptedContact[`${userKey}`];
                             var updateReceiver = {};
                             updateReceiver["users/" + currentUserKey + "/contacts/"] = acceptedContact;
@@ -408,6 +417,76 @@ function declineFriendRequest(username, profile_picture, currentUserKey) {
     }).catch((error) => {
         console.error(error);
     });
+}
+
+// Show all friends
+function showAllFriends() {
+    friendTabsBufferElement.innerHTML = ``;
+    const currentUserKey = getCurrentUserKey();
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, 'users/')).then((user) => {
+        if (user.exists()) {
+            const data = user.val()[currentUserKey]['contacts'];
+            for (var userId in data) {
+                const isFriend = data[userId];
+                if ((isFriend === true) && (userId !== currentUserKey)) {
+                    friendTabsBufferElement.innerHTML += `
+                    <div class="friend-tab">
+                        <img src="${user.val()[userId].profile_picture}" class="user-profile-pic" alt="user_logo" />
+                        <span class="username">${user.val()[userId].username}</span>
+                        <div class="friend-dropdown-settings hidden">
+                            <ul class="friend-tab-settings">
+                                <li class="friend-setting-option new-chat-btn">Message</li>
+                                <li class="friend-setting-option remove-friend-btn">Remove friend</li>
+                            </ul>
+                        </div>
+                        <button class="friend-settings-btn"><img class="three-dots-img" src="./assets/icons/three_dots.png" alt="friend-settings-icon"/></button>
+                    </div>
+                    `;
+                }
+            }
+        }
+        else {
+            console.log("No data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+}
+
+friendTabsBufferElement.addEventListener("click", (event) => {
+    const element = event.target;
+    if(element.classList.contains('three-dots-img')) {
+        const buttonElement = element.parentElement;
+        const friendTabElement = buttonElement.parentElement;
+        const dropdownElement = friendTabElement.querySelector(".friend-dropdown-settings");
+        if(dropdownElement.classList.contains('hidden')) {
+            dropdownElement.classList.remove('hidden');
+            // const ulElement = dropdownElement.children[0];
+            // const newChatButtonElement = ulElement.children[0];
+            // const removeFriendButtonElement = ulElement.children[1];
+        }
+        else {
+            dropdownElement.classList.add('hidden');
+        }
+    }
+    if(element.classList.contains('new-chat-btn')) {
+        newChat();
+    }
+    if(element.classList.contains('remove-friend-btn')) {
+        const ulElement = element.parentElement;
+        const dropdownElement = ulElement.parentElement;
+        const friendTabElement = dropdownElement.parentElement;
+        const username = friendTabElement.querySelector("span").textContent.trim();
+        const profile_picture = friendTabElement.querySelector("img").getAttribute("src");
+        console.log(username);
+        console.log(profile_picture);
+        // removeContact();
+    }
+});
+
+function newChat() {
+    console.log("newChat function");
 }
 
 /*

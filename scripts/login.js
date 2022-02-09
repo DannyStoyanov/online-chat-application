@@ -110,6 +110,20 @@ function existingSignUpgEmailAddress() {
     return true; // existing such email
 }
 
+// Check for user with the same username
+function existingUsername(username) {
+    for (var i = 0; i < localStorage.length; i++){
+        const email = localStorage.key(i);
+        const data = JSON.parse(storage.getItem(`${email}`));
+        if (data[1] !== null) {
+            if(data[1] === username) {
+                return true; // existing such username
+            }
+        }
+    }
+    return false; // not existing username
+}
+
 // Username validation and visuals for correctness
 function checkSignUpUsername() {
     const inputUsername = signUpUsernameElement.value.trim();
@@ -117,7 +131,13 @@ function checkSignUpUsername() {
         setErrorFor(signUpUsernameElement, 'Username cannot be blank'); // add error message and red styling for input
     }
     else {
-        setSuccessFor(signUpUsernameElement); // add green styling for input
+        if(!existingUsername(inputUsername)) {
+            setSuccessFor(signUpUsernameElement); // add green styling for input
+        }
+        else {
+            setErrorFor(signUpUsernameElement, 'Username is already taken'); // add error message and red styling for input
+
+        }
     }
 }
 
