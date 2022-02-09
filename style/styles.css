@@ -285,6 +285,7 @@ ul {
     background: #2C6975;
     border: 2px solid #E0ECDE;
     border-radius: 0px 20px 0px 20px;
+    z-index: 1;
 }
 
 .escape-search-results-btn {

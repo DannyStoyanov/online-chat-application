@@ -363,7 +363,6 @@ function acceptFriendRequest(username, profile_picture, currentUserKey) {
                 const userKey = user.key;
                 const userData = user.val();
                 if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
-                    // CHECK IF SENDER = RECEIVER
                     userData.contacts[`${currentUserKey}`] = true;
                     var updateSender = {};
                     updateSender["users/" + userKey + "/contacts/"] = userData.contacts;
@@ -478,15 +477,41 @@ friendTabsBufferElement.addEventListener("click", (event) => {
         const dropdownElement = ulElement.parentElement;
         const friendTabElement = dropdownElement.parentElement;
         const username = friendTabElement.querySelector("span").textContent.trim();
-        const profile_picture = friendTabElement.querySelector("img").getAttribute("src");
-        console.log(username);
-        console.log(profile_picture);
-        // removeContact();
+        removeContact(username);
+        friendTabElement.classList.add('hidden');
     }
 });
 
 function newChat() {
     console.log("newChat function");
+}
+
+function removeContact(username) {
+    const currentUserKey = getCurrentUserKey();
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, `users/`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            snapshot.forEach((user) => {
+                const userKey = user.key;
+                const userData = user.val();
+                if ((userData.username === username) && (userKey !== currentUserKey)) {
+                    get(child(dbRef, `users/` + currentUserKey)).then((currUser) => {
+                        if (currUser.exists()) {
+                            const contacts = currUser.val().contacts;
+                            delete contacts[`${userKey}`];
+                            var updates = {};
+                            updates["users/" + currentUserKey + "/contacts/"] = contacts;
+                            update(ref(database), updates);
+                        }
+                    }).catch((error) => {
+                        console.error(error);
+                    });
+                }
+            });
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
 }
 
 /*
