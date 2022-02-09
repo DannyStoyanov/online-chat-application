@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js";
-import { getDatabase, ref, update, child, get } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-database.js";
+import { getDatabase, ref, update, child, get, onValue } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-database.js";
 // import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-analytics.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -48,9 +48,7 @@ var storage = window.localStorage;
 
 // Default onload page state
 window.addEventListener('load', (event) => {
-    // friendListElement.classList.add('hidden'); // add
-    chatListElement.classList.add('hidden'); // remove after changes
-    showAllFriends(); // remove after changes
+    friendListElement.classList.add('hidden');
 
     friendListButtonElement.classList.remove('active-menu-option');
     chatListButtonElement.classList.add('active-menu-option');
@@ -60,9 +58,6 @@ window.addEventListener('load', (event) => {
 
     // Load current user data
     loadCurrentUser();
-
-    // Check friend requests
-    countContactRequests();
 
     // Chat default filter
     filterAllMessagesButtonElement.classList.add('current-filter');
@@ -103,7 +98,28 @@ function loadCurrentUser() {
     });
 }
 
-//
+// Indicator - number of friend requests
+const currUserKey = getCurrentUserKey();
+const contactsRef = ref(database, 'users/' + currUserKey + '/contacts/');
+onValue(contactsRef, (snapshot) => {
+    var requestsCount = 0;
+    const data = snapshot.val();
+    for (var userId in data) {
+        const isFriend = data[userId];
+        if (isFriend === false) {
+            ++requestsCount;
+        }
+    }
+    if (requestsCount !== 0) {
+        friendRequestsCountElement.classList.remove("hidden");
+        friendRequestsCountElement.innerText = requestsCount;
+    }
+    else {
+        friendRequestsCountElement.classList.add("hidden");
+    }
+});
+
+// Load user info
 function loadCurrentUserData(data) {
     const profilePictureElement = document.getElementById('user-profile-pic');
     const usernameElement = document.getElementById('profile-username');
@@ -338,32 +354,6 @@ function showFriendRequests() {
     });
 }
 
-function countContactRequests() {
-    const currentUserKey = getCurrentUserKey();
-    const dbRef = ref(getDatabase());
-    var requestsCount = 0;
-    get(child(dbRef, `users/` + currentUserKey)).then((currUser) => {
-        if (currUser.exists()) {
-            const contacts = currUser.val()["contacts"];
-            for (var userId in contacts) {
-                const isFriend = contacts[userId];
-                if (isFriend === false) {
-                    ++requestsCount;
-                }
-            }
-            if (requestsCount !== 0) {
-                friendRequestsCountElement.classList.remove("hidden");
-                friendRequestsCountElement.innerText = requestsCount;
-            }
-            else {
-                friendRequestsCountElement.classList.add("hidden");
-            }
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
-}
-
 // Contact requests management
 friendTabsBufferElement.addEventListener("click", event => {
     const element = event.target;
@@ -374,7 +364,6 @@ friendTabsBufferElement.addEventListener("click", event => {
         const currentUser = getCurrentUserKey();
         acceptFriendRequest(username, profile_picture, currentUser);
         requestTabElement.classList.add("hidden");
-        countContactRequests();
     }
     if (element.classList.contains("decline-friend-request-btn")) {
         const requestTabElement = element.parentElement;
@@ -383,7 +372,6 @@ friendTabsBufferElement.addEventListener("click", event => {
         const currentUser = getCurrentUserKey();
         declineFriendRequest(username, profile_picture, currentUser);
         requestTabElement.classList.add("hidden");
-        countContactRequests();
     }
 });
 
