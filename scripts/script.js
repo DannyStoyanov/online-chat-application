@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js";
-import { getDatabase, ref, update, child, get, onValue } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-database.js";
+import { getDatabase, ref, push, update, child, get, onValue } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-database.js";
 // import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-analytics.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -21,6 +21,7 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const usersRef = ref(database, "users/");
 const currentUser = {};
+var currentUserKey = {};
 
 // const analytics = getAnalytics(app);
 
@@ -57,6 +58,7 @@ window.addEventListener('load', (event) => {
     searchResultBufferWrapperElement.classList.add('hidden');
 
     // Load current user data
+    currentUserKey = getCurrentUserKey();
     loadCurrentUser();
 
     // Chat default filter
@@ -474,6 +476,15 @@ function showAllFriends() {
     });
 }
 
+function containsElement(key, arr) {
+    for (var i in arr) {
+        if (arr[i] === key) {
+            return true;
+        }
+    }
+    return false;
+}
+
 friendTabsBufferElement.addEventListener("click", (event) => {
     const element = event.target;
     if (element.classList.contains('three-dots-img')) {
@@ -491,7 +502,9 @@ friendTabsBufferElement.addEventListener("click", (event) => {
         }
     }
     if (element.classList.contains('new-chat-btn')) {
-        newChat();
+        const friendTabElement = element.parentElement.parentElement.parentElement;
+        const username = friendTabElement.querySelector("span").textContent.trim();
+        // writeNewChat(...);
     }
     if (element.classList.contains('remove-friend-btn')) {
         const ulElement = element.parentElement;
@@ -503,8 +516,28 @@ friendTabsBufferElement.addEventListener("click", (event) => {
     }
 });
 
-function newChat() {
-    console.log("newChat function");
+/*
+chat room
+-name
+-members
+-messages
+-private - true/false
+*/
+function writeNewChat(recipientKey, username, senderKey) {
+    const newChatRef = push(database);
+    const chatKey = newChatRef.key;
+    set(ref(database, 'chats/' + chatKey), {
+        "name": username,
+        "members": [senderKey, recipientKey],
+        "messages": {},
+        "private": true
+    }).then(() => {
+        // console.log("Data saved successfully");
+    })
+        .catch((error) => {
+            // console.log("Data not saved");
+        });
+    return newChatRef.key;
 }
 
 function removeContact(username) {
