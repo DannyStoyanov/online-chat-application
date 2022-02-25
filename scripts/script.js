@@ -290,37 +290,8 @@ searchInputElement.addEventListener('change', (event) => {
     searchResultBufferElement.innerHTML = `
     <button class="escape-search-results-btn">x</button>
     `;
-    // get(child(dbRef, `users/`)).then((snapshot) => {
-    //     if (snapshot.exists()) {
-    //         getCurrentUserKey().then(function (currentUserKey) {
-    //             data = snapshot.val();
-    //             for (var key in data) {
-    //                 if ((data[key].username === searchInputElement.value.trim()) && key !== currentUserKey) {
-    //                     anySearchResults = true;
-    //                     searchResultBufferElement.innerHTML += `
-    //                     <div class="search-contact-tab">
-    //                         <div class="image-username-wrapper">
-    //                             <img src="${data[key].profile_picture}" class="user-profile-pic tab-element" alt="user_logo"/>
-    //                             <span class="username tab-element">${data[key].username}</span>
-    //                         </div>
-    //                         <button class="add-friend-btn tab-element">Add</button>
-    //                     </div>
-    //                     `;
-    //                 }
-    //             }
-    //             if (anySearchResults === false) {
-    //                 searchResultBufferElement.innerHTML += `<span class="no-search-results">There is no user: ${searchInputElement.value.trim()}</span>`;
-    //             }
-    //         });
-    //     } else {
-    //         console.log("No data available");
-    //     }
-    // }).catch((error) => {
-    //     console.error(error);
-    // });
-
     const usersPromise = getUsers();
-    usersPromise.then(function(users) {
+    usersPromise.then(function (users) {
         if (users) {
             getCurrentUserKey().then(function (currentUserKey) {
                 for (var key in users) {
@@ -367,27 +338,21 @@ searchResultBufferElement.addEventListener("click", event => {
 
 // Send friend request to user
 function sendFriendRequest(username, profile_picture, currentUserKey) {
-    const dbRef = ref(getDatabase());
-    get(child(dbRef, 'users/')).then((snapshot) => {
-        if (snapshot.exists()) {
-            snapshot.forEach((user) => {
-                const userKey = user.key;
-                const userData = user.val();
-                if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
-                    if (userData.contacts[`${currentUserKey}`] !== true) {
-                        userData.contacts[`${currentUserKey}`] = false;
-                        const updates = {};
-                        updates["users/" + userKey + "/contacts/"] = userData.contacts;
-                        update(ref(database), updates);
-                    }
+    const usersPromise = getUsers();
+    usersPromise.then(function (users) {
+        for (var key in users) {
+            const userKey = key;
+            const userData = users[key];
+            if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
+                console.log(userData.contacts[`${currentUserKey}`]);
+                if (userData.contacts[`${currentUserKey}`] !== true) {
+                    userData.contacts[`${currentUserKey}`] = false;
+                    const updates = {};
+                    updates["users/" + userKey + "/contacts/"] = userData.contacts;
+                    update(ref(database), updates);
                 }
-            });
+            }
         }
-        else {
-            console.log("No data available");
-        }
-    }).catch((error) => {
-        console.error(error);
     });
 }
 
@@ -411,26 +376,21 @@ function getUser(userId) {
 function showFriendRequests() {
     friendTabsBufferElement.innerHTML = ``;
     getCurrentUserKey().then(function (currentUserKey) {
-        const dbRef = ref(getDatabase());
-        get(child(dbRef, 'users/')).then((user) => {
-            if (user.exists()) {
-                const data = user.val()[currentUserKey]['contacts'];
-                for (var userId in data) {
-                    const isFriend = data[userId];
-                    if (isFriend === false) {
-                        friendTabsBufferElement.innerHTML += `
+        const usersPromise = getUsers();
+        usersPromise.then(function (users) {
+            const data = users[currentUserKey]['contacts'];
+            for (var userId in data) {
+                const isFriend = data[userId];
+                if (isFriend === false) {
+                    friendTabsBufferElement.innerHTML += `
                         <div class="friend-tab">
-                            <img src="${user.val()[userId].profile_picture}" class="user-profile-pic" alt="user_logo" />
-                            <span class="username">${user.val()[userId].username}</span>
+                            <img src="${users[userId].profile_picture}" class="user-profile-pic" alt="user_logo" />
+                            <span class="username">${users[userId].username}</span>
                             <button class="friend-request-option-btn accept-friend-request-btn">Accept</button>
                             <button class="friend-request-option-btn decline-friend-request-btn">Decline</button>
                         </div>
                         `;
-                    }
                 }
-            }
-            else {
-                console.log("No data available");
             }
         }).catch((error) => {
             console.error(error);
@@ -445,7 +405,7 @@ friendTabsBufferElement.addEventListener("click", event => {
         const requestTabElement = element.parentElement;
         const username = requestTabElement.querySelector("span").textContent.trim();
         const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
-        getCurrentUserKey().then(function(currentUserKey) {
+        getCurrentUserKey().then(function (currentUserKey) {
             acceptFriendRequest(username, profile_picture, currentUserKey);
             requestTabElement.classList.add("hidden");
         });
@@ -454,7 +414,7 @@ friendTabsBufferElement.addEventListener("click", event => {
         const requestTabElement = element.parentElement;
         const username = requestTabElement.querySelector("span").textContent.trim();
         const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
-        getCurrentUserKey().then(function(currentUserKey) {
+        getCurrentUserKey().then(function (currentUserKey) {
             declineFriendRequest(username, profile_picture, currentUserKey);
             requestTabElement.classList.add("hidden");
         });
@@ -464,99 +424,86 @@ friendTabsBufferElement.addEventListener("click", event => {
 // Accept friend request
 function acceptFriendRequest(username, profile_picture, currentUserKey) {
     const dbRef = ref(getDatabase());
-    get(child(dbRef, `users/`)).then((snapshot) => {
-        if (snapshot.exists()) {
-            snapshot.forEach((user) => {
-                const userKey = user.key;
-                const userData = user.val();
-                if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
-                    userData.contacts[`${currentUserKey}`] = true;
-                    var updateSender = {};
-                    updateSender["users/" + userKey + "/contacts/"] = userData.contacts;
-                    update(ref(database), updateSender);
-                    get(child(dbRef, `users/` + currentUserKey)).then((acceptingUser) => {
-                        if (acceptingUser.exists()) {
-                            const acceptedContact = acceptingUser.val().contacts;
-                            acceptedContact[`${userKey}`] = true;
-                            var updateReceiver = {};
-                            updateReceiver["users/" + currentUserKey + "/contacts/"] = acceptedContact;
-                            update(ref(database), updateReceiver);
-                        }
-                    }).catch((error) => {
-                        console.error(error);
-                    });
-                }
-            });
+    const usersPromise = getUsers();
+    usersPromise.then(function (users) {
+        for (var key in users) {
+            const userKey = key;
+            const userData = users[key];
+            if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
+                userData.contacts[`${currentUserKey}`] = true;
+                var updateSender = {};
+                updateSender["users/" + userKey + "/contacts/"] = userData.contacts;
+                update(ref(database), updateSender);
+                get(child(dbRef, `users/` + currentUserKey)).then((acceptingUser) => {
+                    if (acceptingUser.exists()) {
+                        const acceptedContact = acceptingUser.val().contacts;
+                        acceptedContact[`${userKey}`] = true;
+                        var updateReceiver = {};
+                        updateReceiver["users/" + currentUserKey + "/contacts/"] = acceptedContact;
+                        update(ref(database), updateReceiver);
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                });
+            }
         }
-    }).catch((error) => {
-        console.error(error);
     });
 }
 
 // Decline friend request
 function declineFriendRequest(username, profile_picture, currentUserKey) {
     const dbRef = ref(getDatabase());
-    get(child(dbRef, `users/`)).then((snapshot) => {
-        if (snapshot.exists()) {
-            snapshot.forEach((user) => {
-                const userKey = user.key;
-                const userData = user.val();
-                if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
-                    delete userData.contacts[`${currentUserKey}`];
-                    var updateSender = {};
-                    updateSender["users/" + userKey + "/contacts/"] = userData.contacts;
-                    update(ref(database), updateSender);
-                    get(child(dbRef, `users/` + currentUserKey)).then((acceptingUser) => {
-                        if (acceptingUser.exists()) {
-                            const acceptedContact = acceptingUser.val().contacts;
-                            delete acceptedContact[`${userKey}`];
-                            var updateReceiver = {};
-                            updateReceiver["users/" + currentUserKey + "/contacts/"] = acceptedContact;
-                            update(ref(database), updateReceiver);
-                        }
-                    }).catch((error) => {
-                        console.error(error);
-                    });
-                }
-            });
+    const usersPromise = getUsers();
+    usersPromise.then(function (users) {
+        for (var key in users) {
+            const userKey = key;
+            const userData = users[key];
+            if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
+                delete userData.contacts[`${currentUserKey}`];
+                var updateSender = {};
+                updateSender["users/" + userKey + "/contacts/"] = userData.contacts;
+                update(ref(database), updateSender);
+                get(child(dbRef, `users/` + currentUserKey)).then((acceptingUser) => {
+                    if (acceptingUser.exists()) {
+                        const acceptedContact = acceptingUser.val().contacts;
+                        delete acceptedContact[`${userKey}`];
+                        var updateReceiver = {};
+                        updateReceiver["users/" + currentUserKey + "/contacts/"] = acceptedContact;
+                        update(ref(database), updateReceiver);
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                });
+            }
         }
-    }).catch((error) => {
-        console.error(error);
     });
 }
 
 // Show all friends
 function showAllFriends() {
     friendTabsBufferElement.innerHTML = ``;
-    getCurrentUserKey().then(function(currentUserKey) {
-        const dbRef = ref(getDatabase());
-        get(child(dbRef, 'users/')).then((user) => {
-            if (user.exists()) {
-                const data = user.val()[currentUserKey]['contacts'];
-                for (var userId in data) {
-                    const isFriend = data[userId];
-                    if ((isFriend === true) && (userId !== currentUserKey)) {
-                        friendTabsBufferElement.innerHTML += `
-                        <div class="friend-tab">
-                            <img src="${user.val()[userId].profile_picture}" class="user-profile-pic" alt="user_logo" />
-                            <span class="username">${user.val()[userId].username}</span>
-                            <div class="friend-dropdown-settings hidden">
-                                <ul class="friend-tab-settings">
-                                    <li class="friend-setting-option new-chat-btn">Message</li>
-                                    <li class="friend-setting-option remove-friend-btn">Remove friend</li>
-                                </ul>
-                            </div>
-                            <button class="friend-settings-btn"><img class="three-dots-img" src="./assets/icons/three_dots.png" alt="friend-settings-icon"/></button>
+    getCurrentUserKey().then(function (currentUserKey) {
+        const usersPromise = getUsers();
+        usersPromise.then(function (users) {
+            const data = users[currentUserKey]['contacts'];
+            for (var userId in data) {
+                const isFriend = data[userId];
+                if ((isFriend === true) && (userId !== currentUserKey)) {
+                    friendTabsBufferElement.innerHTML += `
+                    <div class="friend-tab">
+                        <img src="${users[userId].profile_picture}" class="user-profile-pic" alt="user_logo" />
+                        <span class="username">${users[userId].username}</span>
+                        <div class="friend-dropdown-settings hidden">
+                            <ul class="friend-tab-settings">
+                                <li class="friend-setting-option new-chat-btn">Message</li>
+                                <li class="friend-setting-option remove-friend-btn">Remove friend</li>
+                            </ul>
                         </div>
-                        `;
-                    }
+                        <button class="friend-settings-btn"><img class="three-dots-img" src="./assets/icons/three_dots.png" alt="friend-settings-icon"/></button>
+                    </div>
+                    `;
                 }
             }
-            else {
-                console.log("No data available");
-            }
-        }).catch((error) => {
-            console.error(error);
         });
     });
 }
@@ -626,7 +573,7 @@ function writeNewChat(recipientKey, username, senderKey) {
 }
 
 function removeContact(username) {
-    getCurrentUserKey().then(function(currentUserKey) {
+    getCurrentUserKey().then(function (currentUserKey) {
         const dbRef = ref(getDatabase());
         get(child(dbRef, `users/`)).then((snapshot) => {
             if (snapshot.exists()) {
