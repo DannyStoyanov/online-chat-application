@@ -23,7 +23,61 @@ const usersRef = ref(database, "users/");
 const currentUser = {};
 var currentUserKey = {};
 
-// const analytics = getAnalytics(app);
+// Get users data from database
+async function getUsers() {
+    const dbRef = ref(getDatabase());
+    const temp = await get(child(dbRef, "users/")).then((snapshot) => {
+        if (snapshot.exists()) {
+            return snapshot.val();
+        }
+        else {
+            console.log("No such user data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+    return temp;
+}
+
+// Get user by given email address from database
+async function getUserByEmail(email) {
+    const dbRef = ref(getDatabase());
+    const temp = await get(child(dbRef, "users/")).then((snapshot) => {
+        if (snapshot.exists()) {
+            for (var userId in snapshot.val()) {
+                if (snapshot.val()[userId].email === email) {
+                    return snapshot.val()[userId];
+                }
+            }
+        }
+        else {
+            console.log("No such user data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+    return temp;
+}
+
+// Get key of user by given email address from database
+async function getKeyOfUserByEmail(email) {
+    const dbRef = ref(getDatabase());
+    const temp = await get(child(dbRef, "users/")).then((snapshot) => {
+        if (snapshot.exists()) {
+            for (var userId in snapshot.val()) {
+                if (snapshot.val()[userId].email === email) {
+                    return userId;
+                }
+            }
+        }
+        else {
+            console.log("No such user data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+    return temp;
+}
 
 const friendListElement = document.getElementById('friend-list-wrapper');
 const chatListElement = document.getElementById('chat-list-wrapper');
@@ -44,8 +98,8 @@ const addFriendButtonElements = document.getElementsByClassName('add-friend-btn'
 const friendTabsBufferElement = document.getElementById('friend-tabs');
 const friendRequestsCountElement = document.getElementById('friend-requests-count');
 
-// Localstorage
-var storage = window.localStorage;
+// Session storage
+var sessionStorage = window.sessionStorage;
 
 // Default onload page state
 window.addEventListener('load', (event) => {
@@ -73,30 +127,42 @@ window.addEventListener('load', (event) => {
 
 // Get current user key
 function getCurrentUserKey() {
-    const currentEmail = JSON.parse(storage.getItem(`current-user`));
-    const data = JSON.parse(storage.getItem(currentEmail));
-    if (data === null) {
-        console.log("Error. Current user isn't registered");
-        return -1;
-    }
-    const key = data[3];
-    return key;
+    const currentEmail = JSON.parse(sessionStorage.getItem("current-user"));
+    const userDataPromise = getKeyOfUserByEmail(currentEmail);
+    return userDataPromise.then(function (key) {
+        return key;
+    }).catch(function(error) {
+        console.log(error);
+    });
+}
+
+// Get current user data
+function getCurrentUserData() {
+    const currentEmail = JSON.parse(sessionStorage.getItem("current-user"));
+    const userDataPromise = getUserByEmail(currentEmail);
+    return userDataPromise.then(function (user) {
+        return user;
+    });
 }
 
 // Get current user data from database
 function loadCurrentUser() {
-    const key = getCurrentUserKey();
-    const dbRef = ref(getDatabase());
-    var data = {};
-    get(child(dbRef, `users/`)).then((snapshot) => {
-        if (snapshot.exists()) {
-            data = snapshot.val()[key];
-            loadCurrentUserData(data);
-        } else {
-            console.log("No data available");
-        }
-    }).catch((error) => {
-        console.error(error);
+    // getCurrentUserKey().then(function(key) {
+    //     const dbRef = ref(getDatabase());
+    //     var data = {};
+    //     get(child(dbRef, `users/`)).then((snapshot) => {
+    //         if (snapshot.exists()) {
+    //             data = snapshot.val()[key];
+    //             loadCurrentUserData(data);
+    //         } else {
+    //             console.log("No data available");
+    //         }
+    //     }).catch((error) => {
+    //         console.error(error);
+    //     });
+    // });
+    getCurrentUserData().then(function(user) {
+        loadCurrentUserData(user);
     });
 }
 
