@@ -206,6 +206,7 @@ ul {
 
 #listfield-wrapper {
     min-width: 25%;
+    max-width: 25%;
     min-height: 100%;
 
     display: flex;
@@ -572,7 +573,9 @@ ul {
 
 #chat-wrapper {
     min-width: 60%;
-
+    max-width: 60%;
+    max-height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -608,7 +611,9 @@ ul {
 #chat-window {
     width: 100%;
     min-height: 80%;
+    max-height: 80%;
     background-color: #E0ECDE;
+    overflow: auto;
 }
 
 #chat-input-field {
@@ -663,4 +668,36 @@ ul {
 
 .hidden-visibility {
     visibility: hidden;
+}
+
+#message-list {
+    height: auto;
+    width: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: auto;
+}
+ 
+.messages {
+    position: relative;
+    bottom: 0%;
+    width: 60%;
+    height: auto;
+    padding: 10px;
+    border-radius: 20px;
+    margin-bottom: 5px;
+}
+
+.message-right {
+    position: relative;
+    right: 0%;
+    background-color: #6BB2AD;
+}
+
+.message-left {
+    position: relative;
+    left: 0%;
+    background-color: #2C6975;
 }
