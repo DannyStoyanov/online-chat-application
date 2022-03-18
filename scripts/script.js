@@ -178,21 +178,8 @@ window.addEventListener('load', (event) => {
     // chatListElement.classList.add("hidden");
     updateTitle();
 
-    // // Load default chat
-    // const currentUserKeyPromise = getCurrentUserKey();
-    // currentUserKeyPromise.then(function (key) {
-    //     const currentUserPromise = getCurrentUserData();
-    //     currentUserPromise.then(function (currentUser) {
-    //         const existingChatPromise = existingChat([currentUser.username, username]);
-    //         existingChatPromise.then(function (exists) {
-    //             if (!exists) {
-    //                 const chatKey = writeNewChat(currentUser.username, currentUser.username);
-    //                 writeNewMessages("Chat sample", chatKey);
-    //             }
-    //             loadChatRoom(key, currentUser.username, key);
-    //         });
-    //     });
-    // });
+    // Database default values
+    setDefaultChatsDatabaseState();
 });
 
 // Get current user key
@@ -620,7 +607,8 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                         }
                         else {
                             const chatKey = writeNewChat(currentUser.username, username);
-                            writeNewMessages("Chat sample", chatKey);
+                            console.log(chatKey);
+                            // writeNewMessages("Chat sample", chatKey);
                             console.log("NOT EXISTING");
                         }
                         loadChatRoom(recipientKey, username, currentUserKey);
@@ -651,13 +639,14 @@ chat room
 async function existingChat(members) {
     const chatsPromise = getChats();
     return chatsPromise.then(function (chats) {
+        var flag = false // 1 - existing chat, 0 - not existing chat
         for (var key in chats) {
             const chatKey = key;
             const chatData = chats[key];
             if (members.length === chats[key].members.length) {
                 for (var key in members) {
-                    console.log(members[key] + " " + chatData.members);
-                    if (!containsElement(members[key], chatData.members)) {
+                    console.log(`Member ${members[key]} \n In ${chatData.members} \n MemberInArr? ${containsElement(members[key], chatData.members)}`)
+                    if (containsElement(members[key], chatData.members) === false) {
                         return false;
                     }
                 }
@@ -670,6 +659,106 @@ async function existingChat(members) {
     });
 }
 
+function setDefaultChatsDatabaseState() {
+    const currentUserUsernamePromise = getCurrentUserData();
+    currentUserUsernamePromise.then(function (currentUser) {
+        const chatsPromise = getChats();
+        return chatsPromise.then(function (chats) {
+            if (chats !== undefined) {
+                for (var key in chats) {
+                    if (chats[key].name === "Fluffster") {
+                        sessionStorage.setItem("default-chat-key", JSON.stringify(key));
+                        sessionStorage.setItem("current-chat-key", JSON.stringify(key));
+                    }
+                }
+            }
+            else {
+                let defaultChatKey = writeDefaultChat(currentUser.username);
+                sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
+                sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
+            }
+            loadDefaultChatWindow();
+        });
+    });
+}
+
+// Load default chat
+function loadDefaultChatWindow() {
+    const defaultChatKey = JSON.parse(sessionStorage.getItem("default-chat-key"));
+    // loadChatWindow(defaultChatKey);
+}
+
+// function loadChatWindow(chatKey) {
+//     const dbRef = ref(getDatabase());
+//     get(child(dbRef, "chats/" + chatKey + "/messages/")).then((chat) => { // CHECK HERE!
+//         if (chat.exists()) {
+//             const messageListElement = document.getElementById('message-list');
+//             const message = chat.val().messages;
+//             console.log(message) // messages JSON {}
+//             const listItem = document.createElement("li");
+//             const currentUserPromise = getCurrentUserData();
+//             currentUserPromise.then(function (currentUser) {
+//                 if (message.username === currentUser.username) {
+//                     listItem.innerHTML = `
+//                     <div class="message-right messages">
+//                         <div>
+//                             <span class="message-username"><b>${message.username}</b></span>
+//                             <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+//                         </div>
+//                         <span class="message-text">${message.text}</span>
+//                     </div>
+//                     `;
+//                 }
+//                 else {
+//                     listItem.innerHTML = `
+//                     <div class="message-left messages">
+//                         <div>
+//                             <span class="message-username"><b>${message.username}</b></span>
+//                             <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+//                         <div>
+//                         <span class="message-text">${message.text}</span>
+//                     </div>
+//                     `;
+//                 }
+//             });
+//             messageListElement.appendChild(listItem);
+//         }
+//         // sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey)); 
+//     });
+// }
+// const currentUserKeyPromise = getCurrentUserKey();
+// currentUserKeyPromise.then(function (key) {
+//     const currentUserPromise = getCurrentUserData();
+//     currentUserPromise.then(function (currentUser) {
+//         const existingChatPromise = existingChat([currentUser.username, username]);
+//         existingChatPromise.then(function (exists) {
+//             if (!exists) {
+//                 const chatKey = writeNewChat(currentUser.username, currentUser.username);
+//                 writeNewMessages("Chat sample", chatKey);
+//             }
+//             loadChatRoom(key, currentUser.username, key);
+//         });
+//     });
+// });
+
+function writeDefaultChat(senderUsername) {
+    const dataRef = ref(database, "chats/");
+    const newChatRef = push(dataRef);
+    const chatKey = newChatRef.key;
+    set(ref(database, "chats/" + chatKey), {
+        "name": `Fluffster`,
+        "members": [senderUsername],
+        "private": true,
+        "messages": {}
+    }).then(() => {
+        // console.log("Data saved successfully");
+    }).catch((error) => {
+        // console.log("Data not saved");
+    });
+    messageInputElement.value = "";
+    return newChatRef.key;
+}
+
 function writeNewChat(senderUsername, username) {
     const dataRef = ref(database, "chats/");
     const newChatRef = push(dataRef);
@@ -677,7 +766,12 @@ function writeNewChat(senderUsername, username) {
     set(ref(database, "chats/" + chatKey), {
         "name": username,
         "members": [senderUsername, username],
-        "private": true
+        "private": true,
+        "messages": {
+            // "username": `--- new chat ---`,
+            // "date": Date.now(),
+            // "text": "",
+        }
     }).then(() => {
         // console.log("Data saved successfully");
     }).catch((error) => {
@@ -734,12 +828,16 @@ function removeContact(username) {
 }
 
 // Messages
-const msgsRef = ref(database, "messages");
-
+const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
+const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
 const messageInputElement = document.getElementById('message-input');
 // const sendMessageBtnElement = document.getElementById('send-message-btn');
 
 // sendMessageBtnElement.addEventListener("click", event => {
+//     const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
+//     console.log(currentChatKey);
+//     const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
+//     console.log(msgsRef);
 //     const messageRef = push(msgsRef);
 //     const currentUserPromise = getCurrentUserData();
 //     currentUserPromise.then(function(currentUser) {
@@ -753,10 +851,11 @@ const messageInputElement = document.getElementById('message-input');
 // });
 
 messageInputElement.addEventListener("change", event => {
-    // const currentChatRef = 
+    const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
+    const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
     const messageRef = push(msgsRef);
     const currentUserPromise = getCurrentUserData();
-    currentUserPromise.then(function(currentUser) {
+    currentUserPromise.then(function (currentUser) {
         set(messageRef, {
             "username": currentUser.username,
             "date": Date.now(),
@@ -771,7 +870,7 @@ onChildAdded(msgsRef, (data) => {
     const message = data.val();
     const listItem = document.createElement("li");
     const currentUserPromise = getCurrentUserData();
-    currentUserPromise.then(function(currentUser) {
+    currentUserPromise.then(function (currentUser) {
         if (message.username === currentUser.username) {
             listItem.innerHTML = `
         <div class="message-right messages">
@@ -798,16 +897,16 @@ onChildAdded(msgsRef, (data) => {
     messageListElement.appendChild(listItem);
 });
 
-function writeNewMessages(recipient, chatKey) {
-    const dataRef = ref(database, "messages/");
-    const newMessagesRef = push(dataRef);
-    const messageKey = newMessagesRef.key;
-    set(ref(database, "messages/" + messageKey), {
-        "chatId": chatKey
-    }).then(() => {
-        // console.log("Data saved successfully");
-    }).catch((error) => {
-        // console.log("Data not saved");
-    });
-    return newMessagesRef.key;
-}
+// function writeNewMessages(recipient, chatKey) {
+//     const dataRef = ref(database, "messages/");
+//     const newMessagesRef = push(dataRef);
+//     const messageKey = newMessagesRef.key;
+//     set(ref(database, "messages/" + messageKey), {
+//         "chatId": chatKey
+//     }).then(() => {
+//         // console.log("Data saved successfully");
+//     }).catch((error) => {
+//         // console.log("Data not saved");
+//     });
+//     return newMessagesRef.key;
+// }
