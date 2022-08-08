@@ -123,7 +123,7 @@ async function getChats() {
             return snapshot.val();
         }
         else {
-            console.log("No such user data available");
+            // console.log("No such user data available");
         }
     }).catch((error) => {
         console.error(error);
@@ -660,16 +660,25 @@ async function existingChat(members) {
 }
 
 function setDefaultChatsDatabaseState() {
-    const currentUserUsernamePromise = getCurrentUserData();
-    currentUserUsernamePromise.then(function (currentUser) {
+    const currentUserPromise = getCurrentUserData();
+    currentUserPromise.then(function (currentUser) {
         const chatsPromise = getChats();
         return chatsPromise.then(function (chats) {
             if (chats !== undefined) {
+                var existingChat = false;
                 for (var key in chats) {
-                    if (chats[key].name === "Fluffster") {
-                        sessionStorage.setItem("default-chat-key", JSON.stringify(key));
-                        sessionStorage.setItem("current-chat-key", JSON.stringify(key));
+                    console.log(`${chats[key].name}  ---  ${chats[key].members} --- ${currentUser.username}`);
+                    if ((chats[key].name === "Fluffster") && (chats[key].members[0] === currentUser.username)) {
+                        console.log("PASS");
+                        // sessionStorage.setItem("default-chat-key", JSON.stringify(key));
+                        // sessionStorage.setItem("current-chat-key", JSON.stringify(key));
+                        existingChat = true;
                     }
+                }
+                if (existingChat === false) {
+                    let defaultChatKey = writeDefaultChat(currentUser.username);
+                    sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
+                    sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
                 }
             }
             else {
@@ -677,7 +686,7 @@ function setDefaultChatsDatabaseState() {
                 sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
                 sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
             }
-            loadDefaultChatWindow();
+            // loadDefaultChatWindow();
         });
     });
 }
@@ -685,47 +694,48 @@ function setDefaultChatsDatabaseState() {
 // Load default chat
 function loadDefaultChatWindow() {
     const defaultChatKey = JSON.parse(sessionStorage.getItem("default-chat-key"));
-    // loadChatWindow(defaultChatKey);
+    loadChatWindow(defaultChatKey);
 }
 
-// function loadChatWindow(chatKey) {
-//     const dbRef = ref(getDatabase());
-//     get(child(dbRef, "chats/" + chatKey + "/messages/")).then((chat) => { // CHECK HERE!
-//         if (chat.exists()) {
-//             const messageListElement = document.getElementById('message-list');
-//             const message = chat.val().messages;
-//             console.log(message) // messages JSON {}
-//             const listItem = document.createElement("li");
-//             const currentUserPromise = getCurrentUserData();
-//             currentUserPromise.then(function (currentUser) {
-//                 if (message.username === currentUser.username) {
-//                     listItem.innerHTML = `
-//                     <div class="message-right messages">
-//                         <div>
-//                             <span class="message-username"><b>${message.username}</b></span>
-//                             <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-//                         </div>
-//                         <span class="message-text">${message.text}</span>
-//                     </div>
-//                     `;
-//                 }
-//                 else {
-//                     listItem.innerHTML = `
-//                     <div class="message-left messages">
-//                         <div>
-//                             <span class="message-username"><b>${message.username}</b></span>
-//                             <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-//                         <div>
-//                         <span class="message-text">${message.text}</span>
-//                     </div>
-//                     `;
-//                 }
-//             });
-//             messageListElement.appendChild(listItem);
-//         }
-//         // sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey)); 
-//     });
-// }
+function loadChatWindow(chatKey) {
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, "chats/" + chatKey + "/messages/")).then((messages) => {
+        if (messages.exists()) {
+            const messageListElement = document.getElementById('message-list');
+            const messagesList = messages.val();
+            for (var key in messagesList) {
+                const message = messagesList[key];
+                const listItem = document.createElement("li");
+                const currentUserPromise = getCurrentUserData();
+                currentUserPromise.then(function (currentUser) {
+                    if (message.username === currentUser.username) {
+                        listItem.innerHTML = `
+                        <div class="message-right messages">
+                            <div>
+                                <span class="message-username"><b>${message.username}</b></span>
+                                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                            </div>
+                            <span class="message-text">${message.text}</span>
+                        </div>
+                        `;
+                    }
+                    else {
+                        listItem.innerHTML = `
+                        <div class="message-left messages">
+                            <div>
+                                <span class="message-username"><b>${message.username}</b></span>
+                                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                            <div>
+                            <span class="message-text">${message.text}</span>
+                        </div>
+                        `;
+                    }
+                });
+                messageListElement.appendChild(listItem);
+            }
+        }
+    });
+}
 // const currentUserKeyPromise = getCurrentUserKey();
 // currentUserKeyPromise.then(function (key) {
 //     const currentUserPromise = getCurrentUserData();
