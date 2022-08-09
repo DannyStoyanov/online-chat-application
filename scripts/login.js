@@ -331,6 +331,7 @@ signUpButtonElement.addEventListener("click", event => {
         // Writing user to storage
         const key = writeNewUserData(email, username, password);
         sessionStorage.setItem("current-user", JSON.stringify(signUpEmailElement.value.trim()));
+        sessionStorage.setItem("current-user-key", JSON.stringify(key));
 
         signUpFormElement.submit();
 
@@ -423,6 +424,7 @@ loginButtonElement.addEventListener("click", event => {
                 if (isCorrect === true) {
                     loginFormElement.submit();
                     sessionStorage.setItem("current-user", JSON.stringify(loginEmailElement.value.trim()));
+
                     loginEmailElement.value = "";
                     loginPasswordElement.value = "";
                     window.location.href = "./main.html";

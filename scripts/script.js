@@ -58,22 +58,6 @@ async function getUserByEmail(email) {
     return temp;
 }
 
-// Get user by given key address from database
-async function getUserByKey(userKey) {
-    const dbRef = ref(getDatabase());
-    const temp = await get(child(dbRef, "users/" + userKey)).then((snapshot) => {
-        if (snapshot.exists()) {
-            return snapshot.val();
-        }
-        else {
-            console.log("No such user data available");
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
-    return temp;
-}
-
 // Get user by given username address from database
 async function getUserKeyByUsername(username) {
     const dbRef = ref(getDatabase());
@@ -134,7 +118,6 @@ const addFriendButtonElements = document.getElementsByClassName('add-friend-btn'
 const friendTabsBufferElement = document.getElementById('friend-tabs');
 const friendRequestsCountElement = document.getElementById('friend-requests-count');
 const chatRoomElement = document.getElementById('chat-room');
-const chatRoomTitle = document.getElementById('chat-room-header');
 
 // Session storage
 var sessionStorage = window.sessionStorage;
@@ -576,6 +559,8 @@ function showAllFriends() {
     });
 }
 
+import { existingChat, createNewChat, loadChatRoom } from "./chats.js";
+
 friendTabsBufferElement.addEventListener("click", (event) => {
     const element = event.target;
     if (element.classList.contains('three-dots-img')) {
@@ -604,13 +589,12 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                     const existingChatPromise = existingChat([currentUser.username, username]);
                     existingChatPromise.then(function (exists) {
                         if (exists) {
-                            console.log("EXISTING");
+                            // console.log("EXISTING");
                         }
                         else {
-                            const chatKey = writeNewChat(currentUser.username, username);
-                            console.log(chatKey);
+                            const chatKey = createNewChat(currentUser.username, username);
                             // writeNewMessages("Chat sample", chatKey);
-                            console.log("NOT EXISTING");
+                            // console.log("NOT EXISTING");
                         }
                         loadChatRoom(recipientKey, username, currentUserKey);
                     });

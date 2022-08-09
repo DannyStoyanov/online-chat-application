@@ -25,11 +25,15 @@ var currentUserKey = {};
 // Default onload page state
 window.addEventListener('load', (event) => {
     createDefaultChat();
+    setCurrentUserKeyToSessionStorage();
     // const currentUserChatsPromise = getCurrentUserChats();
     // currentUserChatsPromise.then(function (currentUserChats) {
     //     console.log(currentUserChats); 
     // });
 });
+
+// Session storage
+var sessionStorage = window.sessionStorage;
 
 /*
 chat room
@@ -57,6 +61,45 @@ async function getUserByEmail(email) {
         console.error(error);
     });
     return temp;
+}
+
+// Get user by given key address from database
+async function getUserByKey(userKey) {
+    const dbRef = ref(getDatabase());
+    const temp = await get(child(dbRef, "users/" + userKey)).then((snapshot) => {
+        if (snapshot.exists()) {
+            return snapshot.val();
+        }
+        else {
+            console.log("No such user data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+    return temp;
+}
+
+export async function getUserKeyByEmail(email) {
+    const dbRef = ref(getDatabase());
+    const temp = await get(child(dbRef, "users/")).then((snapshot) => {
+        if (snapshot.exists()) {
+            for (var userId in snapshot.val()) {
+                if (snapshot.val()[userId].email === email) {
+                    return userId;
+                }
+            }
+        }
+        else {
+            console.log("No such user data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+    return temp;
+}
+
+async function setCurrentUserKeyToSessionStorage() {
+
 }
 
 // Get current user data
@@ -95,7 +138,9 @@ async function getCurrentUserChats() {
     return arr;
 }
 
-function createNewChat(senderUsername, username) {
+// sessionStorage.setItem("current-user-key", JSON.stringify(key));
+
+export function createNewChat(senderUsername, username) {
     const dataRef = ref(database, "chats/");
     const newChatRef = push(dataRef);
     const chatKey = newChatRef.key;
@@ -113,6 +158,7 @@ function createNewChat(senderUsername, username) {
     }).catch((error) => {
         // console.log("Data not saved");
     });
+    sessionStorage.setItem("current-chat-key", JSON.stringify(newChatRef.key.trim()));
     return newChatRef.key;
 }
 
@@ -127,7 +173,7 @@ function containsElement(key, arr) {
 }
 
 // Check for existing chat
-async function existingChat(members) {
+export async function existingChat(members) {
     const chatsPromise = getChats();
     return await chatsPromise.then(function (chats) {
         if (chats === undefined) {
@@ -160,43 +206,47 @@ async function createDefaultChat() {
                 const chatKey = createNewChat(user.username, "Fluffster Team");
                 // writeNewMessages("Chat sample", chatKey);
             }
-            // loadChatRoom(key, currentUser.username, key);
+        });
+        const currentUserEmail = JSON.parse(sessionStorage.getItem("current-user"));
+        const currentUserKeyPromise = getUserKeyByEmail(currentUserEmail);
+        currentUserKeyPromise.then((currentUserKey) => {
+            loadChatRoom(currentUserKey, "Fluffster Team", currentUserKey);
+            sessionStorage.setItem("current-user-key", JSON.stringify(currentUserKey));
         });
         // createNewChat(user.username, "Fluffster Team");
     });
 }
 
-// function setDefaultChatsDatabaseState() {
-//     const currentUserPromise = getCurrentUserData();
-//     currentUserPromise.then(function (currentUser) {
-//         const chatsPromise = getChats();
-//         return chatsPromise.then(function (chats) {
-//             if (chats !== undefined) {
-//                 var existingChat = false;
-//                 for (var key in chats) {
-//                     console.log(`${chats[key].name}  ---  ${chats[key].members} --- ${currentUser.username}`);
-//                     if ((chats[key].name === "Fluffster") && (chats[key].members[0] === currentUser.username)) {
-//                         console.log("PASS");
-//                         // sessionStorage.setItem("default-chat-key", JSON.stringify(key));
-//                         // sessionStorage.setItem("current-chat-key", JSON.stringify(key));
-//                         existingChat = true;
-//                     }
-//                 }
-//                 if (existingChat === false) {
-//                     let defaultChatKey = writeDefaultChat(currentUser.username);
-//                     sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
-//                     sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
-//                 }
-//             }
-//             else {
-//                 let defaultChatKey = writeDefaultChat(currentUser.username);
-//                 sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
-//                 sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
-//             }
-//             // loadDefaultChatWindow();
-//         });
-//     });
-// }
+// Messages
+const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
+const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
+const messageInputElement = document.getElementById('message-input');
+// const sendMessageBtnElement = document.getElementById('send-message-btn');
+const chatRoomTitle = document.getElementById('chat-room-header');
+
+export async function loadChatRoom(recipientKey, username, currentUserKey) {
+    const user = await getUserByKey(recipientKey);
+    if (user == undefined) {
+        console.log("Couldn't load chat room!");
+        return undefined;
+    }
+    chatRoomTitle.innerHTML = `
+    <div id="chat-room-header">
+    <div>
+        <img src="${user.profile_picture}" alt="user-profile-pic"
+            id="user-profile-pic-chat" />
+    </div>
+    <div id="chat-room-name">
+        <span>${user.username}</span>
+    </div>
+    <div>
+    </div>
+    `;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+
 
 // // Load default chat
 // function loadDefaultChatWindow() {
@@ -398,3 +448,37 @@ async function createDefaultChat() {
 // //     });
 // //     return newMessagesRef.key;
 // // }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+// function setDefaultChatsDatabaseState() {
+//     const currentUserPromise = getCurrentUserData();
+//     currentUserPromise.then(function (currentUser) {
+//         const chatsPromise = getChats();
+//         return chatsPromise.then(function (chats) {
+//             if (chats !== undefined) {
+//                 var existingChat = false;
+//                 for (var key in chats) {
+//                     console.log(`${chats[key].name}  ---  ${chats[key].members} --- ${currentUser.username}`);
+//                     if ((chats[key].name === "Fluffster") && (chats[key].members[0] === currentUser.username)) {
+//                         console.log("PASS");
+//                         // sessionStorage.setItem("default-chat-key", JSON.stringify(key));
+//                         // sessionStorage.setItem("current-chat-key", JSON.stringify(key));
+//                         existingChat = true;
+//                     }
+//                 }
+//                 if (existingChat === false) {
+//                     let defaultChatKey = writeDefaultChat(currentUser.username);
+//                     sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
+//                     sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
+//                 }
+//             }
+//             else {
+//                 let defaultChatKey = writeDefaultChat(currentUser.username);
+//                 sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
+//                 sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
+//             }
+//             // loadDefaultChatWindow();
+//         });
+//     });
+// }
