@@ -115,22 +115,6 @@ async function getKeyOfUserByEmail(email) {
     return temp;
 }
 
-// Get chats data from database
-async function getChats() {
-    const dbRef = ref(getDatabase());
-    const temp = await get(child(dbRef, "chats/")).then((snapshot) => {
-        if (snapshot.exists()) {
-            return snapshot.val();
-        }
-        else {
-            // console.log("No such user data available");
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
-    return temp;
-}
-
 const friendListElement = document.getElementById('friend-list-wrapper');
 const chatListElement = document.getElementById('chat-list-wrapper');
 const chatListButtonElement = document.getElementById('open-chat-list-btn');
@@ -177,9 +161,6 @@ window.addEventListener('load', (event) => {
 
     // chatListElement.classList.add("hidden");
     updateTitle();
-
-    // Database default values
-    setDefaultChatsDatabaseState();
 });
 
 // Get current user key
@@ -280,7 +261,7 @@ logOutButtonElement.addEventListener('click', (event) => {
 
 // Redirect to login page
 function logOut() {
-    window.location.href = "index.html";
+    window.location.href = "login.html";
 }
 
 // Chat filter settings:
@@ -537,6 +518,35 @@ function declineFriendRequest(username, profile_picture, currentUserKey) {
     });
 }
 
+function removeContact(username) {
+    getCurrentUserKey().then(function (currentUserKey) {
+        const dbRef = ref(getDatabase());
+        get(child(dbRef, `users/`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                snapshot.forEach((user) => {
+                    const userKey = user.key;
+                    const userData = user.val();
+                    if ((userData.username === username) && (userKey !== currentUserKey)) {
+                        get(child(dbRef, `users/` + currentUserKey)).then((currUser) => {
+                            if (currUser.exists()) {
+                                const contacts = currUser.val().contacts;
+                                delete contacts[`${userKey}`];
+                                var updates = {};
+                                updates["users/" + currentUserKey + "/contacts/"] = contacts;
+                                update(ref(database), updates);
+                            }
+                        }).catch((error) => {
+                            console.error(error);
+                        });
+                    }
+                });
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+    });
+}
+
 // Show all friends
 function showAllFriends() {
     friendTabsBufferElement.innerHTML = ``;
@@ -564,15 +574,6 @@ function showAllFriends() {
             }
         });
     });
-}
-
-function containsElement(key, arr) {
-    for (var i in arr) {
-        if (arr[i] === key) {
-            return true;
-        }
-    }
-    return false;
 }
 
 friendTabsBufferElement.addEventListener("click", (event) => {
@@ -626,297 +627,3 @@ friendTabsBufferElement.addEventListener("click", (event) => {
         friendTabElement.classList.add('hidden');
     }
 });
-
-/*
-chat room
--name
--members
--messages
--private - true/false
-*/
-
-// Check for existing chat
-async function existingChat(members) {
-    const chatsPromise = getChats();
-    return chatsPromise.then(function (chats) {
-        var flag = false // 1 - existing chat, 0 - not existing chat
-        for (var key in chats) {
-            const chatKey = key;
-            const chatData = chats[key];
-            if (members.length === chats[key].members.length) {
-                for (var key in members) {
-                    console.log(`Member ${members[key]} \n In ${chatData.members} \n MemberInArr? ${containsElement(members[key], chatData.members)}`)
-                    if (containsElement(members[key], chatData.members) === false) {
-                        return false;
-                    }
-                }
-            }
-            else {
-                return false;
-            }
-        }
-        return true;
-    });
-}
-
-function setDefaultChatsDatabaseState() {
-    const currentUserPromise = getCurrentUserData();
-    currentUserPromise.then(function (currentUser) {
-        const chatsPromise = getChats();
-        return chatsPromise.then(function (chats) {
-            if (chats !== undefined) {
-                var existingChat = false;
-                for (var key in chats) {
-                    console.log(`${chats[key].name}  ---  ${chats[key].members} --- ${currentUser.username}`);
-                    if ((chats[key].name === "Fluffster") && (chats[key].members[0] === currentUser.username)) {
-                        console.log("PASS");
-                        // sessionStorage.setItem("default-chat-key", JSON.stringify(key));
-                        // sessionStorage.setItem("current-chat-key", JSON.stringify(key));
-                        existingChat = true;
-                    }
-                }
-                if (existingChat === false) {
-                    let defaultChatKey = writeDefaultChat(currentUser.username);
-                    sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
-                    sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
-                }
-            }
-            else {
-                let defaultChatKey = writeDefaultChat(currentUser.username);
-                sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
-                sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
-            }
-            // loadDefaultChatWindow();
-        });
-    });
-}
-
-// Load default chat
-function loadDefaultChatWindow() {
-    const defaultChatKey = JSON.parse(sessionStorage.getItem("default-chat-key"));
-    loadChatWindow(defaultChatKey);
-}
-
-function loadChatWindow(chatKey) {
-    const dbRef = ref(getDatabase());
-    get(child(dbRef, "chats/" + chatKey + "/messages/")).then((messages) => {
-        if (messages.exists()) {
-            const messageListElement = document.getElementById('message-list');
-            const messagesList = messages.val();
-            for (var key in messagesList) {
-                const message = messagesList[key];
-                const listItem = document.createElement("li");
-                const currentUserPromise = getCurrentUserData();
-                currentUserPromise.then(function (currentUser) {
-                    if (message.username === currentUser.username) {
-                        listItem.innerHTML = `
-                        <div class="message-right messages">
-                            <div>
-                                <span class="message-username"><b>${message.username}</b></span>
-                                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-                            </div>
-                            <span class="message-text">${message.text}</span>
-                        </div>
-                        `;
-                    }
-                    else {
-                        listItem.innerHTML = `
-                        <div class="message-left messages">
-                            <div>
-                                <span class="message-username"><b>${message.username}</b></span>
-                                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-                            <div>
-                            <span class="message-text">${message.text}</span>
-                        </div>
-                        `;
-                    }
-                });
-                messageListElement.appendChild(listItem);
-            }
-        }
-    });
-}
-// const currentUserKeyPromise = getCurrentUserKey();
-// currentUserKeyPromise.then(function (key) {
-//     const currentUserPromise = getCurrentUserData();
-//     currentUserPromise.then(function (currentUser) {
-//         const existingChatPromise = existingChat([currentUser.username, username]);
-//         existingChatPromise.then(function (exists) {
-//             if (!exists) {
-//                 const chatKey = writeNewChat(currentUser.username, currentUser.username);
-//                 writeNewMessages("Chat sample", chatKey);
-//             }
-//             loadChatRoom(key, currentUser.username, key);
-//         });
-//     });
-// });
-
-function writeDefaultChat(senderUsername) {
-    const dataRef = ref(database, "chats/");
-    const newChatRef = push(dataRef);
-    const chatKey = newChatRef.key;
-    set(ref(database, "chats/" + chatKey), {
-        "name": `Fluffster`,
-        "members": [senderUsername],
-        "private": true,
-        "messages": {}
-    }).then(() => {
-        // console.log("Data saved successfully");
-    }).catch((error) => {
-        // console.log("Data not saved");
-    });
-    messageInputElement.value = "";
-    return newChatRef.key;
-}
-
-function writeNewChat(senderUsername, username) {
-    const dataRef = ref(database, "chats/");
-    const newChatRef = push(dataRef);
-    const chatKey = newChatRef.key;
-    set(ref(database, "chats/" + chatKey), {
-        "name": username,
-        "members": [senderUsername, username],
-        "private": true,
-        "messages": {
-            // "username": `--- new chat ---`,
-            // "date": Date.now(),
-            // "text": "",
-        }
-    }).then(() => {
-        // console.log("Data saved successfully");
-    }).catch((error) => {
-        // console.log("Data not saved");
-    });
-    return newChatRef.key;
-}
-
-function loadChatRoom(recipientKey, username, currentUserKey) {
-    const userPromise = getUserByKey(recipientKey);
-    userPromise.then(function (user) {
-        chatRoomTitle.innerHTML = `
-        <div id="chat-room-header">
-        <div>
-            <img src="${user.profile_picture}" alt="user-profile-pic"
-                id="user-profile-pic-chat" />
-        </div>
-        <div id="chat-room-name">
-            <span>${user.username}</span>
-        </div>
-        <div>
-        </div>
-        `;
-    });
-}
-
-function removeContact(username) {
-    getCurrentUserKey().then(function (currentUserKey) {
-        const dbRef = ref(getDatabase());
-        get(child(dbRef, `users/`)).then((snapshot) => {
-            if (snapshot.exists()) {
-                snapshot.forEach((user) => {
-                    const userKey = user.key;
-                    const userData = user.val();
-                    if ((userData.username === username) && (userKey !== currentUserKey)) {
-                        get(child(dbRef, `users/` + currentUserKey)).then((currUser) => {
-                            if (currUser.exists()) {
-                                const contacts = currUser.val().contacts;
-                                delete contacts[`${userKey}`];
-                                var updates = {};
-                                updates["users/" + currentUserKey + "/contacts/"] = contacts;
-                                update(ref(database), updates);
-                            }
-                        }).catch((error) => {
-                            console.error(error);
-                        });
-                    }
-                });
-            }
-        }).catch((error) => {
-            console.error(error);
-        });
-    });
-}
-
-// Messages
-const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
-const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
-const messageInputElement = document.getElementById('message-input');
-// const sendMessageBtnElement = document.getElementById('send-message-btn');
-
-// sendMessageBtnElement.addEventListener("click", event => {
-//     const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
-//     console.log(currentChatKey);
-//     const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
-//     console.log(msgsRef);
-//     const messageRef = push(msgsRef);
-//     const currentUserPromise = getCurrentUserData();
-//     currentUserPromise.then(function(currentUser) {
-//         set(messageRef, {
-//             "username": currentUser.username,
-//             "date": Date.now(),
-//             "text": messageInputElement.value,
-//         });
-//      messageInputElement.value = "";
-//     });
-// });
-
-messageInputElement.addEventListener("change", event => {
-    const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
-    const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
-    const messageRef = push(msgsRef);
-    const currentUserPromise = getCurrentUserData();
-    currentUserPromise.then(function (currentUser) {
-        set(messageRef, {
-            "username": currentUser.username,
-            "date": Date.now(),
-            "text": messageInputElement.value,
-        });
-        messageInputElement.value = "";
-    });
-});
-
-onChildAdded(msgsRef, (data) => {
-    const messageListElement = document.getElementById('message-list');
-    const message = data.val();
-    const listItem = document.createElement("li");
-    const currentUserPromise = getCurrentUserData();
-    currentUserPromise.then(function (currentUser) {
-        if (message.username === currentUser.username) {
-            listItem.innerHTML = `
-        <div class="message-right messages">
-            <div>
-                <span class="message-username"><b>${message.username}</b></span>
-                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-            </div>
-            <span class="message-text">${message.text}</span>
-        </div>
-        `;
-        }
-        else {
-            listItem.innerHTML = `
-        <div class="message-left messages">
-            <div>
-                <span class="message-username"><b>${message.username}</b></span>
-                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-            <div>
-            <span class="message-text">${message.text}</span>
-        </div>
-        `;
-        }
-    });
-    messageListElement.appendChild(listItem);
-});
-
-// function writeNewMessages(recipient, chatKey) {
-//     const dataRef = ref(database, "messages/");
-//     const newMessagesRef = push(dataRef);
-//     const messageKey = newMessagesRef.key;
-//     set(ref(database, "messages/" + messageKey), {
-//         "chatId": chatKey
-//     }).then(() => {
-//         // console.log("Data saved successfully");
-//     }).catch((error) => {
-//         // console.log("Data not saved");
-//     });
-//     return newMessagesRef.key;
-// }
