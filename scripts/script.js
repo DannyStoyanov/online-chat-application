@@ -366,7 +366,7 @@ function sendFriendRequest(username, profile_picture, currentUserKey) {
             const userKey = key;
             const userData = users[key];
             if ((userData.username === username) && (userData.profile_picture === profile_picture) && (userKey !== currentUserKey)) {
-                console.log(userData.contacts[`${currentUserKey}`]);
+                // console.log(userData); MAYBE REWORK
                 if (userData.contacts[`${currentUserKey}`] !== true) {
                     userData.contacts[`${currentUserKey}`] = false;
                     const updates = {};
@@ -517,6 +517,18 @@ function removeContact(username) {
                                 var updates = {};
                                 updates["users/" + currentUserKey + "/contacts/"] = contacts;
                                 update(ref(database), updates);
+                                deleteChat([currUser.val().username , username]);
+                            }
+                        }).catch((error) => {
+                            console.error(error);
+                        });
+                        get(child(dbRef, `users/` + userKey)).then((otherUser) => {
+                            if (otherUser.exists()) {
+                                const contacts = otherUser.val().contacts;
+                                delete contacts[`${currentUserKey}`];
+                                var updates = {};
+                                updates["users/" + userKey + "/contacts/"] = contacts;
+                                update(ref(database), updates);
                             }
                         }).catch((error) => {
                             console.error(error);
@@ -559,7 +571,7 @@ function showAllFriends() {
     });
 }
 
-import { existingChat, createNewChat, loadChatRoom } from "./chats.js";
+import { existingChat, createNewChat, loadChatRoom, deleteChat } from "./chats.js";
 
 friendTabsBufferElement.addEventListener("click", (event) => {
     const element = event.target;

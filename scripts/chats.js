@@ -217,6 +217,27 @@ async function createDefaultChat() {
     });
 }
 
+export async function deleteChat(members) {
+    var chats = await getChats();
+    for (var key in chats) {
+        var chatData = chats[key];
+        var counter = 0;
+        for (var i in members) {
+            if(containsElement(members[i], chatData.members) === true) {
+                counter = counter + 1;
+            }
+        }
+        if (counter === chatData.members.length) {
+            const newChats = chats;
+            delete newChats[`${key}`];
+            var updates = {};
+            updates["chats/"] = newChats;
+            update(ref(database), updates);
+            return undefined
+        }
+    }
+}
+
 // Messages
 const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
 const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
