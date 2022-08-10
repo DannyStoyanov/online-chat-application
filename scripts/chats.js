@@ -66,7 +66,7 @@ async function getUserByKey(userKey) {
             return snapshot.val();
         }
         else {
-            console.log("No such user data available");
+            console.log("#ERROR:getUserByKey(): No such user data available");
         }
     }).catch((error) => {
         console.error(error);
@@ -85,7 +85,7 @@ export async function getUserKeyByEmail(email) {
             }
         }
         else {
-            console.log("No such user data available");
+            console.log("#ERROR:getUserKeyByEmail(): No such user data available");
         }
     }).catch((error) => {
         console.error(error);
@@ -257,6 +257,12 @@ async function createDefaultChat() {
     });
 }
 
+async function loadDefaultChat() {
+    let currentUser = await getCurrentUserData;
+    let currentUserKey = Object.keys(currentUser.contacts)[0];
+    loadChatRoom(currentUserKey, "Fluffster Team", currentUserKey);
+}
+
 // Deletes chat from user's data
 async function deleteChatInUserData(userKey, chatKey) {
     let user = await getUserByKey(userKey);
@@ -293,13 +299,85 @@ export async function deleteChat(members) {
             updates["chats/"] = newChats;
             update(ref(database), updates);
             for (var i in members) {
-                console.log("members[i]: " + members[i]);
                 const userKey = await getUserKeyByUsername(members[i]);
                 deleteChatInUserData(userKey, key);
+                loadDefaultChat();
             }
-            return undefined
+            return undefined;
         }
     }
+}
+
+const chatListElement = document.getElementById('chat-tabs');
+
+// Display list of chats which the user is member of
+export async function loadChatList() {
+    chatListElement.innerHTML = ``;
+    let user = await getCurrentUserData();
+    if (user === undefined) {
+        console.log("No data for current user found!");
+        return undefined;
+    }
+    const keys = user.chats;
+    if (user.chats.length === 1) {
+        chatListElement.innerHTML = `<span class="empty-list-feedback-message">There are no active conversations</span>`;
+        return undefined;
+    }
+    const chats = await getChats();
+    for (var i in keys) {
+        var chatData = chats[keys[i]];
+        if(chatData !== undefined) {
+            const timestamp = chatData.messages[(chatData.messages.length)-1].date;
+            let date = new Date(timestamp);
+            let displayDate = date.getDate()+
+            "."+(date.getMonth()+1)+
+            "."+date.getFullYear()+
+            "\n"+date.getHours()+
+            ":"+date.getMinutes();
+            let lastMessage = chatData.messages[(chatData.messages.length)-1].text;
+            let recipientKey = await getUserKeyByUsername(chatData.name);
+            let recipient = await getUserByKey(recipientKey);
+            let profile_picture = recipient.profile_picture;
+            let empty = " ";
+            chatListElement.innerHTML += `
+                <div class="chat-tab">
+                    <img src="${profile_picture}" class="user-profile-pic" alt="user_logo" />
+                    <div class="chat-preview">
+                        <div class="message-info">
+                            <span class="username">${chatData.name}</span>
+                            <span class="time-sent">${displayDate}</span>
+                        </div>
+                        <span class="message-preview">${lastMessage.split(' ').slice(0, 5).join(' ')}...</span>
+                    </div>
+                    <div class="chat-dropdown-settings hidden">
+                        <ul class="chat-tab-settings">
+                            <li class="chat-setting-option new-chat-btn">Add friend</li>
+                            <li class="chat-setting-option remove-friend-btn">Delete chat</li>
+                        </ul>
+                    </div>
+                    <button class="chat-settings-btn"><img class="three-dots-img" src="./assets/icons/three_dots.png" alt="chat-settings-icon"/></button>
+                </div>
+            `;
+        }
+    }
+}
+
+export async function loadChatRoomFromChatTab(recipientUsername) {
+    let recipientKey = await getUserKeyByUsername(recipientUsername);
+    let recipient = await getUserByKey(recipientKey);
+    let currentUser = await getCurrentUserData();
+    var chatKey;
+    for( var i in currentUser.chats) {
+        if(containsElement(currentUser.chats[i], recipient.chats) === true) {
+            chatKey = currentUser.chats[i];
+        }
+    }
+    if (chatKey === undefined) {
+        // console.log("Error msg: Couldn't find chat!");
+        return undefined;
+    }
+    let currentUserKey = Object.keys(currentUser.contacts)[0];
+    loadChatRoom(recipientKey,  recipientUsername, currentUserKey);
 }
 
 // Messages

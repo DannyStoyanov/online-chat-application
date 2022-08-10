@@ -310,7 +310,7 @@ ul {
     height: 20px;
 }
 
-.friend-settings-btn {
+.friend-settings-btn, .chat-settings-btn{
     position: relative;
     top: -25px;
     right: 5px;
@@ -441,10 +441,18 @@ ul {
     box-shadow: #2C6975 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
+.chat-tab:hover {
+    width: 92.5%;
+    min-height: 5rem;
+    background-color: #E0ECDE;
+    transition: 0.25s;
+    cursor: pointer;
+}
+
 .user-profile-pic {
     width: 50px;
     height: 50px;
-    margin-left: 1rem;
+    margin-left: 0.5rem;
 }
 
 #user-profile-pic-chat {
@@ -532,7 +540,7 @@ ul {
     transition: 0.1s;
 }
 
-.friend-dropdown-settings {
+.friend-dropdown-settings, .chat-dropdown-settings {
     border: 1px solid #2C6975;
     border-radius: 5px;
     position: relative;
@@ -547,17 +555,24 @@ ul {
     background-color: #2C6975;
 }
 
-.friend-tab-settings {
+.friend-tab-settings, .chat-tab-settings {
     list-style: none;
     width: 100%;
     height: 100%;
 }
 
-.friend-setting-option {
+.friend-setting-option, .chat-settings-option {
     padding:3px;
 }
 
 .friend-setting-option:hover {
+    background: #CDE0C9;
+    color: #2C6975;
+    transition: 0.25s;
+    cursor: pointer;
+}
+
+.chat-setting-option:hover {
     background: #CDE0C9;
     color: #2C6975;
     transition: 0.25s;
@@ -700,4 +715,10 @@ ul {
     position: relative;
     left: 0%;
     background-color: #2C6975;
+}
+
+.empty-list-feedback-message {
+    color: #6BB2AD;
+    font-size: 0.8em;
+    margin-top: 1rem;
 }

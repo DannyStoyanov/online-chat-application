@@ -118,6 +118,7 @@ const addFriendButtonElements = document.getElementsByClassName('add-friend-btn'
 const friendTabsBufferElement = document.getElementById('friend-tabs');
 const friendRequestsCountElement = document.getElementById('friend-requests-count');
 const chatRoomElement = document.getElementById('chat-room');
+const chatTabsBufferElement = document.getElementById('chat-tabs');
 
 // Session storage
 var sessionStorage = window.sessionStorage;
@@ -125,6 +126,7 @@ var sessionStorage = window.sessionStorage;
 // Default onload page state
 window.addEventListener('load', (event) => {
     friendListElement.classList.add('hidden');
+    loadChatList();
 
     friendListButtonElement.classList.remove('active-menu-option');
     chatListButtonElement.classList.add('active-menu-option');
@@ -206,18 +208,22 @@ function loadCurrentUserData(data) {
     emailElement.innerHTML = `${data["email"]}`;
 }
 
-// Menu option behaviour - Messages
-chatListButtonElement.addEventListener('click', (event) => {
+function openMessagesTab() {
     chatListButtonElement.classList.add('active-menu-option');
     friendListButtonElement.classList.remove('active-menu-option');
 
     chatListElement.classList.remove('hidden');
     friendListElement.classList.add('hidden');
     updateTitle();
+    loadChatList();
+}
+
+// Menu option behaviour - Messages
+chatListButtonElement.addEventListener('click', (event) => {
+    openMessagesTab();
 });
 
-// Menu option behaviour - Contacts
-friendListButtonElement.addEventListener('click', (event) => {
+function openContactsTab() {
     friendListButtonElement.classList.add('active-menu-option');
     chatListButtonElement.classList.remove('active-menu-option');
     showAllFriends();
@@ -225,6 +231,11 @@ friendListButtonElement.addEventListener('click', (event) => {
     friendListElement.classList.remove('hidden');
     chatListElement.classList.add('hidden');
     updateTitle();
+}
+
+// Menu option behaviour - Contacts
+friendListButtonElement.addEventListener('click', (event) => {
+    openContactsTab();
 });
 
 // Updates title in relation to menu option
@@ -571,7 +582,7 @@ function showAllFriends() {
     });
 }
 
-import { existingChat, createNewChat, loadChatRoom, deleteChat, getUserKeyByUsername } from "./chats.js";
+import { existingChat, createNewChat, loadChatRoom, deleteChat, getUserKeyByUsername, loadChatList, loadChatRoomFromChatTab } from "./chats.js";
 
 friendTabsBufferElement.addEventListener("click", (event) => {
     const element = event.target;
@@ -609,11 +620,7 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                             // console.log("NOT EXISTING");
                         }
                         loadChatRoom(recipientKey, username, currentUserKey);
-                        friendListElement.classList.add('hidden');
-                        chatListElement.classList.remove('hidden');
-                        friendListButtonElement.classList.remove('active-menu-option');
-                        chatListButtonElement.classList.add('active-menu-option');
-                        updateTitle();
+                        openMessagesTab();
                     });
                 });
             });
@@ -627,4 +634,27 @@ friendTabsBufferElement.addEventListener("click", (event) => {
         removeContact(username);
         friendTabElement.classList.add('hidden');
     }
+});
+
+
+chatTabsBufferElement.addEventListener("click", (event) => {
+    const element = event.target;
+    if (element.classList.contains('three-dots-img')) {
+        const buttonElement = element.parentElement;
+        const chatTabElement = buttonElement.parentElement;
+        const dropdownElement = chatTabElement.querySelector(".chat-dropdown-settings");
+        if (dropdownElement.classList.contains('hidden')) {
+            dropdownElement.classList.remove('hidden');
+
+        }
+        else {
+            dropdownElement.classList.add('hidden');
+        }
+    }
+    if (element.classList.contains('chat-tab')) {
+        const child = element.childNodes;
+        let recipientUsername = child[3].childNodes[1].querySelector("span").textContent.trim();
+        loadChatRoomFromChatTab(recipientUsername);
+    }
+
 });
