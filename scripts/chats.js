@@ -151,13 +151,53 @@ export async function getUserKeyByUsername(username) {
 
 // sessionStorage.setItem("current-user-key", JSON.stringify(key));
 
-async function addChatKeyToUsersDataViaUsernames(chatKey, recipientUsername, currentUserUsername) {
+async function getChatKey(members) {
+    let chats = await getChats();
+    if (chats === undefined) {
+        console.log("Couln't find chats!");
+        return undefined;
+    }
+    for (var i in chats) {
+        var counter = 0;
+        for (var j in members) {
+            if(containsElement(members[j], chats[i].members) === true) {
+                counter = counter + 1;
+            }
+        }
+        if (counter === members.length) {
+            return i;
+        }
+    }
+}
+
+export async function addChatKeyToUser(recipientUsername, currentUserUsername) {
+    const senderKey = await getUserKeyByUsername(currentUserUsername);
+    if (senderKey === undefined) {
+        return undefined;
+    }
+    let chatKey = await getChatKey([recipientUsername, currentUserUsername]);
+    addChatKeyToUserData(chatKey, senderKey);
+}
+
+export async function addChatKeyToUsersDataViaUsernames(chatKey, recipientUsername, currentUserUsername) {
     const recipientKey = await getUserKeyByUsername(recipientUsername);
     const senderKey = await getUserKeyByUsername(currentUserUsername);
     if (senderKey === undefined || recipientKey === undefined) {
         return undefined
     }
     addChatKeyToUsersData(chatKey, recipientKey, senderKey);
+}
+
+async function addChatKeyToUserData(chatKey, currentUserKey) {
+    const sender = await getUserByKey(currentUserKey);
+    if (sender === undefined) {
+        return undefined;
+    }
+    var newChats = sender.chats;
+    newChats[newChats.length]=chatKey;
+    const updates = {};
+    updates["users/" + currentUserKey + "/chats/"] = newChats;
+    update(ref(database), updates);
 }
 
 async function addChatKeyToUsersData(chatKey, recipientKey, currentUserKey) {
@@ -308,6 +348,22 @@ export async function deleteChat(members) {
     }
 }
 
+export async function removeChat(recipientUsername) {
+    let recipientKey = await getUserKeyByUsername(recipientUsername);
+    let recipient = await getUserByKey(recipientKey);
+    let currentUser = await getCurrentUserData();
+    if (currentUser === undefined || recipient === undefined) {
+        console.log("Couldn't find user!");
+        return undefined;
+    }
+    let currentUserKey = Object.keys(currentUser.contacts)[0];
+    for (var i in currentUser.chats) {
+        if (containsElement(currentUser.chats[i], recipient.chats) === true) {
+            deleteChatInUserData(currentUserKey, currentUser.chats[i]);
+        }
+    }
+}
+
 const chatListElement = document.getElementById('chat-tabs');
 
 // Display list of chats which the user is member of
@@ -352,7 +408,7 @@ export async function loadChatList() {
                     <div class="chat-dropdown-settings hidden">
                         <ul class="chat-tab-settings">
                             <li class="chat-setting-option new-chat-btn">Add friend</li>
-                            <li class="chat-setting-option remove-friend-btn">Delete chat</li>
+                            <li class="chat-setting-option remove-chat-btn">Delete chat</li>
                         </ul>
                     </div>
                     <button class="chat-settings-btn"><img class="three-dots-img" src="./assets/icons/three_dots.png" alt="chat-settings-icon"/></button>

@@ -560,6 +560,16 @@ function showAllFriends() {
         const usersPromise = getUsers();
         usersPromise.then(function (users) {
             const data = users[currentUserKey]['contacts'];
+            // var len = 0;
+            // for (var i in data) {
+            //     if(data[i] === true) {
+            //         len = len + 1;
+            //     }
+            // }
+            // if (len === 1) {
+            //     friendListElement.innerHTML += `<span class="empty-list-feedback-message">There are no contacts</span>`;
+            //     return undefined;
+            // }
             for (var userId in data) {
                 const isFriend = data[userId];
                 if ((isFriend === true) && (userId !== currentUserKey)) {
@@ -582,7 +592,7 @@ function showAllFriends() {
     });
 }
 
-import { existingChat, createNewChat, loadChatRoom, deleteChat, getUserKeyByUsername, loadChatList, loadChatRoomFromChatTab } from "./chats.js";
+import { existingChat, createNewChat, loadChatRoom, deleteChat, getUserKeyByUsername, loadChatList, loadChatRoomFromChatTab, removeChat, addChatKeyToUser } from "./chats.js";
 
 friendTabsBufferElement.addEventListener("click", (event) => {
     const element = event.target;
@@ -613,6 +623,7 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                     existingChatPromise.then(function (exists) {
                         if (exists) {
                             // console.log("EXISTING");
+                            addChatKeyToUser(username, currentUser.username);
                         }
                         else {
                             const chatKey = createNewChat(currentUser.username, username);
@@ -656,5 +667,12 @@ chatTabsBufferElement.addEventListener("click", (event) => {
         let recipientUsername = child[3].childNodes[1].querySelector("span").textContent.trim();
         loadChatRoomFromChatTab(recipientUsername);
     }
-
+    if (element.classList.contains('remove-chat-btn')) {
+        const ulElement = element.parentElement;
+        const dropdownElement = ulElement.parentElement;
+        const chatTabElement = dropdownElement.parentElement;
+        const username = chatTabElement.querySelector("span").textContent.trim();
+        removeChat(username);
+        chatTabElement.classList.add('hidden');
+    }
 });
