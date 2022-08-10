@@ -25,11 +25,6 @@ var currentUserKey = {};
 // Default onload page state
 window.addEventListener('load', (event) => {
     createDefaultChat();
-    setCurrentUserKeyToSessionStorage();
-    // const currentUserChatsPromise = getCurrentUserChats();
-    // currentUserChatsPromise.then(function (currentUserChats) {
-    //     console.log(currentUserChats); 
-    // });
 });
 
 // Session storage
@@ -98,10 +93,6 @@ export async function getUserKeyByEmail(email) {
     return temp;
 }
 
-async function setCurrentUserKeyToSessionStorage() {
-
-}
-
 // Get current user data
 async function getCurrentUserData() {
     const currentEmail = JSON.parse(sessionStorage.getItem("current-user"));
@@ -138,7 +129,54 @@ async function getCurrentUserChats() {
     return arr;
 }
 
+// Get user by given username address from database
+export async function getUserKeyByUsername(username) {
+    const dbRef = ref(getDatabase());
+    const temp = await get(child(dbRef, "users/")).then((snapshot) => {
+        if (snapshot.exists()) {
+            for (var userId in snapshot.val()) {
+                if (snapshot.val()[userId].username === username) {
+                    return userId;
+                }
+            }
+        }
+        else {
+            console.log("No such user data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+    return temp;
+}
+
 // sessionStorage.setItem("current-user-key", JSON.stringify(key));
+
+async function addChatKeyToUsersDataViaUsernames(chatKey, recipientUsername, currentUserUsername) {
+    const recipientKey = await getUserKeyByUsername(recipientUsername);
+    const senderKey = await getUserKeyByUsername(currentUserUsername);
+    if (senderKey === undefined || recipientKey === undefined) {
+        return undefined
+    }
+    addChatKeyToUsersData(chatKey, recipientKey, senderKey);
+}
+
+async function addChatKeyToUsersData(chatKey, recipientKey, currentUserKey) {
+    const recipient = await getUserByKey(recipientKey);
+    const sender = await getUserByKey(currentUserKey);
+    if (sender === undefined || recipient === undefined) {
+        return undefined
+    }
+    var newChats = sender.chats;
+    newChats[newChats.length]=chatKey;
+    const updates = {};
+    updates["users/" + currentUserKey + "/chats/"] = newChats;
+    update(ref(database), updates);
+    newChats = [];
+    newChats = recipient.chats;
+    newChats[newChats.length]=chatKey;
+    updates["users/" + recipientKey + "/chats/"] = newChats;
+    update(ref(database), updates);
+}
 
 export function createNewChat(senderUsername, username) {
     const dataRef = ref(database, "chats/");
@@ -159,6 +197,7 @@ export function createNewChat(senderUsername, username) {
         // console.log("Data not saved");
     });
     sessionStorage.setItem("current-chat-key", JSON.stringify(newChatRef.key.trim()));
+    addChatKeyToUsersDataViaUsernames(chatKey, username, senderUsername);
     return newChatRef.key;
 }
 
@@ -198,6 +237,7 @@ export async function existingChat(members) {
     });
 }
 
+// Creates default chat in the database
 async function createDefaultChat() {
     getCurrentUserData().then(function (user) {
         const existingChatPromise = existingChat([user.username, "Fluffster Team"]);
@@ -217,6 +257,25 @@ async function createDefaultChat() {
     });
 }
 
+// Deletes chat from user's data
+async function deleteChatInUserData(userKey, chatKey) {
+    let user = await getUserByKey(userKey);
+    if (user === undefined) {
+        console.log("Couldn't delete chat in user's data due to not found user!");
+        return undefined;
+    }
+    var newChats = user.chats;
+    for (var i in newChats) {
+        if (newChats[i] === chatKey) {
+            delete newChats[i];
+        }
+    }
+    var updates = {};
+    updates["users/" + userKey + "/chats/"] = newChats;
+    update(ref(database), updates);
+}
+
+// Deletes chat from database
 export async function deleteChat(members) {
     var chats = await getChats();
     for (var key in chats) {
@@ -228,11 +287,16 @@ export async function deleteChat(members) {
             }
         }
         if (counter === chatData.members.length) {
-            const newChats = chats;
+            var newChats = chats;
             delete newChats[`${key}`];
             var updates = {};
             updates["chats/"] = newChats;
             update(ref(database), updates);
+            for (var i in members) {
+                console.log("members[i]: " + members[i]);
+                const userKey = await getUserKeyByUsername(members[i]);
+                deleteChatInUserData(userKey, key);
+            }
             return undefined
         }
     }

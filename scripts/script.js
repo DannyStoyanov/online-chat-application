@@ -58,25 +58,25 @@ async function getUserByEmail(email) {
     return temp;
 }
 
-// Get user by given username address from database
-async function getUserKeyByUsername(username) {
-    const dbRef = ref(getDatabase());
-    const temp = await get(child(dbRef, "users/")).then((snapshot) => {
-        if (snapshot.exists()) {
-            for (var userId in snapshot.val()) {
-                if (snapshot.val()[userId].username === username) {
-                    return userId;
-                }
-            }
-        }
-        else {
-            console.log("No such user data available");
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
-    return temp;
-}
+// // Get user by given username address from database
+// async function getUserKeyByUsername(username) {
+//     const dbRef = ref(getDatabase());
+//     const temp = await get(child(dbRef, "users/")).then((snapshot) => {
+//         if (snapshot.exists()) {
+//             for (var userId in snapshot.val()) {
+//                 if (snapshot.val()[userId].username === username) {
+//                     return userId;
+//                 }
+//             }
+//         }
+//         else {
+//             console.log("No such user data available");
+//         }
+//     }).catch((error) => {
+//         console.error(error);
+//     });
+//     return temp;
+// }
 
 
 // Get key of user by given email address from database
@@ -571,7 +571,7 @@ function showAllFriends() {
     });
 }
 
-import { existingChat, createNewChat, loadChatRoom, deleteChat } from "./chats.js";
+import { existingChat, createNewChat, loadChatRoom, deleteChat, getUserKeyByUsername } from "./chats.js";
 
 friendTabsBufferElement.addEventListener("click", (event) => {
     const element = event.target;
@@ -609,6 +609,11 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                             // console.log("NOT EXISTING");
                         }
                         loadChatRoom(recipientKey, username, currentUserKey);
+                        friendListElement.classList.add('hidden');
+                        chatListElement.classList.remove('hidden');
+                        friendListButtonElement.classList.remove('active-menu-option');
+                        chatListButtonElement.classList.add('active-menu-option');
+                        updateTitle();
                     });
                 });
             });

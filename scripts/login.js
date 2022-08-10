@@ -84,9 +84,7 @@ function writeNewUserData(email, username, password) {
         "contacts": {
             [userId]: true,
         },
-        "chats": {
-
-        }
+        "chats": [`${username}`]
     }).then(() => {
         // console.log("Data saved successfully");
     }).catch((error) => {
