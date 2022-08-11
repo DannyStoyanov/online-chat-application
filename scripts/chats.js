@@ -25,6 +25,7 @@ var currentUserKey = {};
 // Default onload page state
 window.addEventListener('load', (event) => {
     createDefaultChat();
+    loadDefaultChat();
 });
 
 // Session storage
@@ -149,8 +150,6 @@ export async function getUserKeyByUsername(username) {
     return temp;
 }
 
-// sessionStorage.setItem("current-user-key", JSON.stringify(key));
-
 async function getChatKey(members) {
     let chats = await getChats();
     if (chats === undefined) {
@@ -192,6 +191,11 @@ async function addChatKeyToUserData(chatKey, currentUserKey) {
     const sender = await getUserByKey(currentUserKey);
     if (sender === undefined) {
         return undefined;
+    }
+    for (var i in sender.chats) {
+        if(chatKey === sender.chats[i]) {
+            return undefined;
+        }
     }
     var newChats = sender.chats;
     newChats[newChats.length]=chatKey;
@@ -284,6 +288,8 @@ async function createDefaultChat() {
         existingChatPromise.then(function (exists) {
             if (!exists) {
                 const chatKey = createNewChat(user.username, "Fluffster Team");
+                sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
+                loadDefaultChat();
                 // writeNewMessages("Chat sample", chatKey);
             }
         });
@@ -298,7 +304,7 @@ async function createDefaultChat() {
 }
 
 async function loadDefaultChat() {
-    let currentUser = await getCurrentUserData;
+    let currentUser = await getCurrentUserData();
     let currentUserKey = Object.keys(currentUser.contacts)[0];
     loadChatRoom(currentUserKey, "Fluffster Team", currentUserKey);
 }
@@ -444,23 +450,35 @@ const messageInputElement = document.getElementById('message-input');
 const chatRoomTitle = document.getElementById('chat-room-header');
 
 export async function loadChatRoom(recipientKey, username, currentUserKey) {
-    const user = await getUserByKey(recipientKey);
-    if (user == undefined) {
+    const recipient = await getUserByKey(recipientKey);
+    if (recipient == undefined) {
         console.log("Couldn't load chat room!");
         return undefined;
     }
     chatRoomTitle.innerHTML = `
     <div id="chat-room-header">
     <div>
-        <img src="${user.profile_picture}" alt="user-profile-pic"
+        <img src="${recipient.profile_picture}" alt="user-profile-pic"
             id="user-profile-pic-chat" />
     </div>
     <div id="chat-room-name">
-        <span>${user.username}</span>
+        <span>${recipient.username}</span>
     </div>
     <div>
     </div>
     `;
+    let currentUser = await getCurrentUserData();
+    var chatKey;
+    for( var i in currentUser.chats) {
+        if(containsElement(currentUser.chats[i], recipient.chats) === true) {
+            chatKey = currentUser.chats[i];
+        }
+    }
+    if (chatKey === undefined) {
+        // console.log("Error msg: Couldn't find chat!");
+        return undefined;
+    }
+    sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
