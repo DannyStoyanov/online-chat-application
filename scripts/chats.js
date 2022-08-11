@@ -22,14 +22,20 @@ const database = getDatabase(app);
 const usersRef = ref(database, "users/");
 var currentUserKey = {};
 
-// Default onload page state
-window.addEventListener('load', (event) => {
-    createDefaultChat();
-    loadDefaultChat();
-});
+// imports:
+import * as utils from "./utils.js";
 
 // Session storage
 var sessionStorage = window.sessionStorage;
+
+// DOM elements:
+const chatListElement = document.getElementById('chat-tabs');
+
+// Default onload page state
+window.addEventListener('load', (event) => {
+    createDefaultChat();
+    // setDefaultChatKeyToSessionStorage();
+});
 
 /*
 chat room
@@ -39,117 +45,49 @@ chat room
 -private - true/false
 */
 
-// Get user by given email address from database
-async function getUserByEmail(email) {
-    const dbRef = ref(getDatabase());
-    const temp = await get(child(dbRef, "users/")).then((snapshot) => {
-        if (snapshot.exists()) {
-            for (var userId in snapshot.val()) {
-                if (snapshot.val()[userId].email === email) {
-                    return snapshot.val()[userId];
-                }
-            }
+async function getDefaultChat() {
+    let user = await utils.getCurrentUserData();
+    let chats = await getChats();
+    for (var i in chats) {
+        if ((containsElement(user.username, chats[i].members) === true) && (containsElement("Fluffster Team", chats[i].members) === true)) {
+            return i;
         }
-        else {
-            console.log("No such user data available");
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
-    return temp;
+    }
+    return undefined;
 }
 
-// Get user by given key address from database
-async function getUserByKey(userKey) {
-    const dbRef = ref(getDatabase());
-    const temp = await get(child(dbRef, "users/" + userKey)).then((snapshot) => {
-        if (snapshot.exists()) {
-            return snapshot.val();
+// Rename user's first chat due to initial write problem
+export async function renameFirstChat() {
+    let currentUserKey = await utils.getCurrentUserKey();
+    let user = await utils.getCurrentUserData();
+    if (user === undefined) {
+        return undefined;
+    }
+    let chatKey = await getDefaultChat();
+    for (var i in user.chats) {
+        if (user.chats[i] === user.username) {
+            var newChats = user.chats;
+            newChats[0] = chatKey;
+            const updates = {};
+            updates["users/" + currentUserKey + "/chats/"] = newChats;
+            update(ref(database), updates);
         }
-        else {
-            console.log("#ERROR:getUserByKey(): No such user data available");
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
-    return temp;
-}
-
-export async function getUserKeyByEmail(email) {
-    const dbRef = ref(getDatabase());
-    const temp = await get(child(dbRef, "users/")).then((snapshot) => {
-        if (snapshot.exists()) {
-            for (var userId in snapshot.val()) {
-                if (snapshot.val()[userId].email === email) {
-                    return userId;
-                }
-            }
-        }
-        else {
-            console.log("#ERROR:getUserKeyByEmail(): No such user data available");
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
-    return temp;
-}
-
-// Get current user data
-async function getCurrentUserData() {
-    const currentEmail = JSON.parse(sessionStorage.getItem("current-user"));
-    const userData = await getUserByEmail(currentEmail);
-    return userData;
+    }
 }
 
 // Get chats data from database
 async function getChats() {
     const dbRef = ref(getDatabase());
-    const temp = await get(child(dbRef, "chats/")).then((snapshot) => {
-        if (snapshot.exists()) {
-            return snapshot.val();
-        }
-    }).catch((error) => {
-        console.log(error);
-    });
-    return temp;
-}
-
-async function getCurrentUserChats() {
-    const chats = await getChats();
-    const user = await getCurrentUserData();
-    var arr = [];
-    for (var key in chats) {
-        const chatKey = key;
-        const chatData = chats[key];
-        for (var member in chatData.members) {
-            if(user.username == chatData.members[member]) {
-                arr.push(chatKey);
-            }
-        }
+    var chats = await get(child(dbRef, "chats/"));
+    if (chats === undefined) {
+        console.error("chats.getChats(): Couldn't get chats data from database!");
+        return undefined;
     }
-    return arr;
+    chats = chats.val();
+    return chats;
 }
 
-// Get user by given username address from database
-export async function getUserKeyByUsername(username) {
-    const dbRef = ref(getDatabase());
-    const temp = await get(child(dbRef, "users/")).then((snapshot) => {
-        if (snapshot.exists()) {
-            for (var userId in snapshot.val()) {
-                if (snapshot.val()[userId].username === username) {
-                    return userId;
-                }
-            }
-        }
-        else {
-            console.log("No such user data available");
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
-    return temp;
-}
-
+// Get chat key by list of members
 async function getChatKey(members) {
     let chats = await getChats();
     if (chats === undefined) {
@@ -159,7 +97,7 @@ async function getChatKey(members) {
     for (var i in chats) {
         var counter = 0;
         for (var j in members) {
-            if(containsElement(members[j], chats[i].members) === true) {
+            if (containsElement(members[j], chats[i].members) === true) {
                 counter = counter + 1;
             }
         }
@@ -169,8 +107,33 @@ async function getChatKey(members) {
     }
 }
 
+// Get chat data by chat key
+async function getChatByKey(chatKey) {
+    let chats = await getChats();
+    return chats[chatKey];
+}
+
+// Helper function for addChatKeyToUser
+async function addChatKeyToUserData(chatKey, currentUserKey) {
+    const sender = await utils.getUserByKey(currentUserKey);
+    if (sender === undefined) {
+        return undefined;
+    }
+    for (var i in sender.chats) {
+        if (chatKey === sender.chats[i]) {
+            return undefined;
+        }
+    }
+    var newChats = sender.chats;
+    newChats[newChats.length] = chatKey;
+    const updates = {};
+    updates["users/" + currentUserKey + "/chats/"] = newChats;
+    update(ref(database), updates);
+}
+
+// Add chat key to user's data in database
 export async function addChatKeyToUser(recipientUsername, currentUserUsername) {
-    const senderKey = await getUserKeyByUsername(currentUserUsername);
+    const senderKey = await utils.getUserKeyByUsername(currentUserUsername);
     if (senderKey === undefined) {
         return undefined;
     }
@@ -178,50 +141,36 @@ export async function addChatKeyToUser(recipientUsername, currentUserUsername) {
     addChatKeyToUserData(chatKey, senderKey);
 }
 
+// Helper function for addChatKeyToUsersDataViaUsernames
+async function addChatKeyToUsersData(chatKey, recipientKey, currentUserKey) {
+    const recipient = await utils.getUserByKey(recipientKey);
+    const sender = await utils.getUserByKey(currentUserKey);
+    if (sender === undefined || recipient === undefined) {
+        return undefined
+    }
+    var newChats = sender.chats;
+    newChats[newChats.length] = chatKey;
+    const updates = {};
+    updates["users/" + currentUserKey + "/chats/"] = newChats;
+    update(ref(database), updates);
+    newChats = [];
+    newChats = recipient.chats;
+    newChats[newChats.length] = chatKey;
+    updates["users/" + recipientKey + "/chats/"] = newChats;
+    update(ref(database), updates);
+}
+
+// Update users data database by adding chat key to each one's chat key records by passing usernames
 export async function addChatKeyToUsersDataViaUsernames(chatKey, recipientUsername, currentUserUsername) {
-    const recipientKey = await getUserKeyByUsername(recipientUsername);
-    const senderKey = await getUserKeyByUsername(currentUserUsername);
+    const recipientKey = await utils.getUserKeyByUsername(recipientUsername);
+    const senderKey = await utils.getUserKeyByUsername(currentUserUsername);
     if (senderKey === undefined || recipientKey === undefined) {
         return undefined
     }
     addChatKeyToUsersData(chatKey, recipientKey, senderKey);
 }
 
-async function addChatKeyToUserData(chatKey, currentUserKey) {
-    const sender = await getUserByKey(currentUserKey);
-    if (sender === undefined) {
-        return undefined;
-    }
-    for (var i in sender.chats) {
-        if(chatKey === sender.chats[i]) {
-            return undefined;
-        }
-    }
-    var newChats = sender.chats;
-    newChats[newChats.length]=chatKey;
-    const updates = {};
-    updates["users/" + currentUserKey + "/chats/"] = newChats;
-    update(ref(database), updates);
-}
-
-async function addChatKeyToUsersData(chatKey, recipientKey, currentUserKey) {
-    const recipient = await getUserByKey(recipientKey);
-    const sender = await getUserByKey(currentUserKey);
-    if (sender === undefined || recipient === undefined) {
-        return undefined
-    }
-    var newChats = sender.chats;
-    newChats[newChats.length]=chatKey;
-    const updates = {};
-    updates["users/" + currentUserKey + "/chats/"] = newChats;
-    update(ref(database), updates);
-    newChats = [];
-    newChats = recipient.chats;
-    newChats[newChats.length]=chatKey;
-    updates["users/" + recipientKey + "/chats/"] = newChats;
-    update(ref(database), updates);
-}
-
+// Creates new chat and saves it to database
 export function createNewChat(senderUsername, username) {
     const dataRef = ref(database, "chats/");
     const newChatRef = push(dataRef);
@@ -238,14 +187,21 @@ export function createNewChat(senderUsername, username) {
     }).then(() => {
         // console.log("Data saved successfully");
     }).catch((error) => {
-        // console.log("Data not saved");
+        console.error("chats.createNewChat(_): Couldn't write chat to database!");
     });
     sessionStorage.setItem("current-chat-key", JSON.stringify(newChatRef.key.trim()));
     addChatKeyToUsersDataViaUsernames(chatKey, username, senderUsername);
     return newChatRef.key;
 }
 
-// Linear search
+// Set default chat key to session storage
+async function setDefaultChatKeyToSessionStorage() {
+    let user = await utils.getCurrentUserData();
+    let chatKey = await getChatKey([user.username, "Fluffster Team"]);
+    sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
+}
+
+// Linear search 
 function containsElement(key, arr) {
     for (var i in arr) {
         if (arr[i] === key) {
@@ -281,37 +237,35 @@ export async function existingChat(members) {
     });
 }
 
-// Creates default chat in the database
+// Creates default chat for each user on sign up or loads existing one
 async function createDefaultChat() {
-    getCurrentUserData().then(function (user) {
-        const existingChatPromise = existingChat([user.username, "Fluffster Team"]);
-        existingChatPromise.then(function (exists) {
-            if (!exists) {
-                const chatKey = createNewChat(user.username, "Fluffster Team");
-                sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
-                loadDefaultChat();
-                // writeNewMessages("Chat sample", chatKey);
-            }
-        });
+    let user = await utils.getCurrentUserData();
+    let exists = await existingChat([user.username, "Fluffster Team"]);
+    if (!exists) {
+        const chatKey = createNewChat(user.username, "Fluffster Team");
+        loadDefaultChat();
+        // writeNewMessages("Chat sample", chatKey);
+    }
+    else {
         const currentUserEmail = JSON.parse(sessionStorage.getItem("current-user"));
-        const currentUserKeyPromise = getUserKeyByEmail(currentUserEmail);
-        currentUserKeyPromise.then((currentUserKey) => {
-            loadChatRoom(currentUserKey, "Fluffster Team", currentUserKey);
-            sessionStorage.setItem("current-user-key", JSON.stringify(currentUserKey));
-        });
-        // createNewChat(user.username, "Fluffster Team");
-    });
+        const currentUserKey = await utils.getUserKeyByEmail(currentUserEmail);
+        sessionStorage.setItem("current-user-key", JSON.stringify(currentUserKey));
+        loadDefaultChat();
+    }
 }
 
+// Load default chat
 async function loadDefaultChat() {
-    let currentUser = await getCurrentUserData();
-    let currentUserKey = Object.keys(currentUser.contacts)[0];
+    let currentUser = await utils.getCurrentUserData();
+    let currentUserKey = await utils.getCurrentUserKey();
     loadChatRoom(currentUserKey, "Fluffster Team", currentUserKey);
+    let chatKey = await getChatKey([currentUser.username, "Fluffster Team"]);
+    sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
 }
 
 // Deletes chat from user's data
 async function deleteChatInUserData(userKey, chatKey) {
-    let user = await getUserByKey(userKey);
+    let user = await utils.getUserByKey(userKey);
     if (user === undefined) {
         console.log("Couldn't delete chat in user's data due to not found user!");
         return undefined;
@@ -334,7 +288,7 @@ export async function deleteChat(members) {
         var chatData = chats[key];
         var counter = 0;
         for (var i in members) {
-            if(containsElement(members[i], chatData.members) === true) {
+            if (containsElement(members[i], chatData.members) === true) {
                 counter = counter + 1;
             }
         }
@@ -345,8 +299,9 @@ export async function deleteChat(members) {
             updates["chats/"] = newChats;
             update(ref(database), updates);
             for (var i in members) {
-                const userKey = await getUserKeyByUsername(members[i]);
+                const userKey = await utils.getUserKeyByUsername(members[i]);
                 deleteChatInUserData(userKey, key);
+                console.log(userKey, key);
                 loadDefaultChat();
             }
             return undefined;
@@ -354,10 +309,11 @@ export async function deleteChat(members) {
     }
 }
 
+// Removes chat from chat tabs - Messages
 export async function removeChat(recipientUsername) {
-    let recipientKey = await getUserKeyByUsername(recipientUsername);
-    let recipient = await getUserByKey(recipientKey);
-    let currentUser = await getCurrentUserData();
+    let recipientKey = await utils.getUserKeyByUsername(recipientUsername);
+    let recipient = await utils.getUserByKey(recipientKey);
+    let currentUser = await utils.getCurrentUserData();
     if (currentUser === undefined || recipient === undefined) {
         console.log("Couldn't find user!");
         return undefined;
@@ -370,12 +326,10 @@ export async function removeChat(recipientUsername) {
     }
 }
 
-const chatListElement = document.getElementById('chat-tabs');
-
 // Display list of chats which the user is member of
 export async function loadChatList() {
     chatListElement.innerHTML = ``;
-    let user = await getCurrentUserData();
+    let user = await utils.getCurrentUserData();
     if (user === undefined) {
         console.log("No data for current user found!");
         return undefined;
@@ -388,16 +342,19 @@ export async function loadChatList() {
     const chats = await getChats();
     for (var i in keys) {
         var chatData = chats[keys[i]];
-        if(chatData !== undefined) {
-            const timestamp = chatData.messages[(chatData.messages.length)-1].date;
+        if (chatData !== undefined) {
+            const timestamp = chatData.messages[(chatData.messages.length) - 1].date;
             let date = new Date(timestamp);
-            let displayDate = date.getDate()+
-            "."+(date.getMonth()+1)+
-            "."+date.getFullYear()+
-            "\n"+date.getHours()+
-            ":"+date.getMinutes();
-            let lastMessage = chatData.messages[(chatData.messages.length)-1].text;
-            let recipientKey = await getUserKeyByUsername(chatData.name);
+            let displayDate = date.getDate() +
+                "." + (date.getMonth() + 1) +
+                "." + date.getFullYear() +
+                "\n" + date.getHours() +
+                ":" + date.getMinutes();
+            let lastMessage = chatData.messages[(chatData.messages.length) - 1].text;
+            let recipientKey = await utils.getUserKeyByUsername(chatData.name);
+            if (recipientKey === undefined) {
+                return undefined;
+            }
             let recipient = await getUserByKey(recipientKey);
             let profile_picture = recipient.profile_picture;
             let empty = " ";
@@ -424,13 +381,14 @@ export async function loadChatList() {
     }
 }
 
+// Load chat room after clicking a chat tab in Messages
 export async function loadChatRoomFromChatTab(recipientUsername) {
-    let recipientKey = await getUserKeyByUsername(recipientUsername);
-    let recipient = await getUserByKey(recipientKey);
-    let currentUser = await getCurrentUserData();
+    let recipientKey = await utils.getUserKeyByUsername(recipientUsername);
+    let recipient = await utils.getUserByKey(recipientKey);
+    let currentUser = await utils.getCurrentUserData();
     var chatKey;
-    for( var i in currentUser.chats) {
-        if(containsElement(currentUser.chats[i], recipient.chats) === true) {
+    for (var i in currentUser.chats) {
+        if (containsElement(currentUser.chats[i], recipient.chats) === true) {
             chatKey = currentUser.chats[i];
         }
     }
@@ -439,18 +397,19 @@ export async function loadChatRoomFromChatTab(recipientUsername) {
         return undefined;
     }
     let currentUserKey = Object.keys(currentUser.contacts)[0];
-    loadChatRoom(recipientKey,  recipientUsername, currentUserKey);
+    loadChatRoom(recipientKey, recipientUsername, currentUserKey);
 }
 
 // Messages
-const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
-const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
-const messageInputElement = document.getElementById('message-input');
-// const sendMessageBtnElement = document.getElementById('send-message-btn');
+// const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
+// const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
+// const messageInputElement = document.getElementById('message-input');
+// // const sendMessageBtnElement = document.getElementById('send-message-btn');
 const chatRoomTitle = document.getElementById('chat-room-header');
 
+// Load chat room data
 export async function loadChatRoom(recipientKey, username, currentUserKey) {
-    const recipient = await getUserByKey(recipientKey);
+    const recipient = await utils.getUserByKey(recipientKey);
     if (recipient == undefined) {
         console.log("Couldn't load chat room!");
         return undefined;
@@ -467,11 +426,13 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
     <div>
     </div>
     `;
-    let currentUser = await getCurrentUserData();
+    let currentUser = await utils.getCurrentUserData();
     var chatKey;
-    for( var i in currentUser.chats) {
-        if(containsElement(currentUser.chats[i], recipient.chats) === true) {
+    for (var i in currentUser.chats) {
+        if (containsElement(currentUser.chats[i], recipient.chats) === true) {
             chatKey = currentUser.chats[i];
+            sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
+            return undefined;
         }
     }
     if (chatKey === undefined) {
@@ -500,7 +461,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
 //             for (var key in messagesList) {
 //                 const message = messagesList[key];
 //                 const listItem = document.createElement("li");
-//                 const currentUserPromise = getCurrentUserData();
+//                 const currentUserPromise = utils.getCurrentUserData(); // async&&await?
 //                 currentUserPromise.then(function (currentUser) {
 //                     if (message.username === currentUser.username) {
 //                         listItem.innerHTML = `
@@ -530,9 +491,9 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
 //         }
 //     });
 // }
-// // const currentUserKeyPromise = getCurrentUserKey();
+// // const currentUserKeyPromise = utils.getCurrentUserKey();
 // // currentUserKeyPromise.then(function (key) {
-// //     const currentUserPromise = getCurrentUserData();
+// //     const currentUserPromise = utils.getCurrentUserData(); // await?
 // //     currentUserPromise.then(function (currentUser) {
 // //         const existingChatPromise = existingChat([currentUser.username, username]);
 // //         existingChatPromise.then(function (exists) {
@@ -585,7 +546,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
 // }
 
 // function loadChatRoom(recipientKey, username, currentUserKey) {
-//     const userPromise = getUserByKey(recipientKey);
+//     const userPromise = utils.getUserByKey(recipientKey); // async&&await?
 //     userPromise.then(function (user) {
 //         chatRoomTitle.innerHTML = `
 //         <div id="chat-room-header">
@@ -614,7 +575,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
 // //     const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
 // //     console.log(msgsRef);
 // //     const messageRef = push(msgsRef);
-// //     const currentUserPromise = getCurrentUserData();
+// //     const currentUserPromise = utils.getCurrentUserData(); // await?
 // //     currentUserPromise.then(function(currentUser) {
 // //         set(messageRef, {
 // //             "username": currentUser.username,
@@ -629,7 +590,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
 //     const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
 //     const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
 //     const messageRef = push(msgsRef);
-//     const currentUserPromise = getCurrentUserData();
+//     const currentUserPromise = utils.getCurrentUserData();
 //     currentUserPromise.then(function (currentUser) {
 //         set(messageRef, {
 //             "username": currentUser.username,
@@ -644,7 +605,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
 //     const messageListElement = document.getElementById('message-list');
 //     const message = data.val();
 //     const listItem = document.createElement("li");
-//     const currentUserPromise = getCurrentUserData();
+//     const currentUserPromise = utils.getCurrentUserData();
 //     currentUserPromise.then(function (currentUser) {
 //         if (message.username === currentUser.username) {
 //             listItem.innerHTML = `
@@ -689,7 +650,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 // function setDefaultChatsDatabaseState() {
-//     const currentUserPromise = getCurrentUserData();
+//     const currentUserPromise = utils.getCurrentUserData(); //await?
 //     currentUserPromise.then(function (currentUser) {
 //         const chatsPromise = getChats();
 //         return chatsPromise.then(function (chats) {
