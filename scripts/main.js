@@ -22,7 +22,7 @@ const database = getDatabase(app);
 const usersRef = ref(database, "users/");
 
 // imports:
-import { existingChat, createNewChat, loadChatRoom, deleteChat, loadChatList, loadChatRoomFromChatTab, removeChat, addChatKeyToUser, renameFirstChat } from "./chats.js";
+import { existingChat, createNewChat, loadChatRoom, deleteChat, showAllChats, loadChatRoomFromChatTab, removeChat, sendMessageRequest, renameFirstChat, createDefaultChat, loadMessageRequests, acceptChatRequest, declineChatRequest, isClearConnection  } from "./chats.js";
 import * as utils from "./utils.js";
 
 // Session storage
@@ -52,8 +52,10 @@ const chatTabsBufferElement = document.getElementById('chat-tabs');
 
 // Default onload page state
 window.addEventListener('load', (event) => {
+    createDefaultChat();
+
     friendListElement.classList.add('hidden');
-    // loadChatList();
+    showAllChats();
 
     friendListButtonElement.classList.remove('active-menu-option');
     chatListButtonElement.classList.add('active-menu-option');
@@ -137,8 +139,9 @@ function openMessagesTab() {
 
     chatListElement.classList.remove('hidden');
     friendListElement.classList.add('hidden');
+    showAllChats();
     updateTitle();
-    // loadChatList(); // #TODO: NEED REWORK
+    // showAllChats(); // #TODO: NEED REWORK
 }
 
 // Menu option behaviour - Messages
@@ -188,6 +191,7 @@ logOutButtonElement.addEventListener('click', (event) => {
 // Filter all messages
 filterAllMessagesButtonElement.addEventListener('click', (event) => {
     filterAllMessagesButtonElement.classList.add('current-filter');
+    showAllChats();
 
     // filterUnreadMessagesButtonElement.classList.remove('current-filter');
     // filterGroupsMessagesButtonElement.classList.remove('current-filter');
@@ -215,6 +219,7 @@ filterAllMessagesButtonElement.addEventListener('click', (event) => {
 // Filter requests messages
 filterRequestsMessagesButtonElement.addEventListener('click', (event) => {
     filterRequestsMessagesButtonElement.classList.add('current-filter');
+    loadMessageRequests();
 
     filterAllMessagesButtonElement.classList.remove('current-filter');
     // filterUnreadMessagesButtonElement.classList.remove('current-filter');
@@ -394,29 +399,6 @@ function declineFriendRequest(username, profile_picture, currentUserKey) {
     });
 }
 
-// Contact requests management
-friendTabsBufferElement.addEventListener("click", event => {
-    const element = event.target;
-    if (element.classList.contains("accept-friend-request-btn")) {
-        const requestTabElement = element.parentElement;
-        const username = requestTabElement.querySelector("span").textContent.trim();
-        const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
-        utils.getCurrentUserKey().then(function (currentUserKey) {
-            acceptFriendRequest(username, profile_picture, currentUserKey);
-            requestTabElement.classList.add("hidden");
-        });
-    }
-    if (element.classList.contains("decline-friend-request-btn")) {
-        const requestTabElement = element.parentElement;
-        const username = requestTabElement.querySelector("span").textContent.trim();
-        const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
-        utils.getCurrentUserKey().then(function (currentUserKey) {
-            declineFriendRequest(username, profile_picture, currentUserKey);
-            requestTabElement.classList.add("hidden");
-        });
-    }
-});
-
 // Deletes contact from database and all chats between you and that contact
 function removeContact(username) {
     utils.getCurrentUserKey().then(function (currentUserKey) {
@@ -465,16 +447,6 @@ async function showAllFriends() {
     const currentUserKey = await utils.getCurrentUserKey()
     const users = await utils.getUsers();
     const data = users[currentUserKey]['contacts'];
-    // var len = 0;
-    // for (var i in data) {
-    //     if(data[i] === true) {
-    //         len = len + 1;
-    //     }
-    // }
-    // if (len === 1) {
-    //     friendListElement.innerHTML += `<span class="empty-list-feedback-message">There are no contacts</span>`;
-    //     return undefined;
-    // }
     for (var userId in data) {
         const isFriend = data[userId];
         if ((isFriend === true) && (userId !== currentUserKey)) {
@@ -495,86 +467,138 @@ async function showAllFriends() {
     }
 }
 
-// // Clicking behaviour in Contacts menu
-// friendTabsBufferElement.addEventListener("click", (event) => {
-//     const element = event.target;
-//     if (element.classList.contains('three-dots-img')) {
-//         const buttonElement = element.parentElement;
-//         const friendTabElement = buttonElement.parentElement;
-//         const dropdownElement = friendTabElement.querySelector(".friend-dropdown-settings");
-//         if (dropdownElement.classList.contains('hidden')) {
-//             dropdownElement.classList.remove('hidden');
-//             // const ulElement = dropdownElement.children[0];
-//             // const newChatButtonElement = ulElement.children[0];
-//             // const removeFriendButtonElement = ulElement.children[1];
-//         }
-//         else {
-//             dropdownElement.classList.add('hidden');
-//         }
-//     }
-//     if (element.classList.contains('new-chat-btn')) {
-//         const friendTabElement = element.parentElement.parentElement.parentElement;
-//         const username = friendTabElement.querySelector("span").textContent.trim();
-//         const currentUserUsernamePromise = getCurrentUserData();
-//         currentUserUsernamePromise.then(function (currentUser) {
-//             const currentUserKeyPromise = utils.getCurrentUserKey();
-//             currentUserKeyPromise.then(function (currentUserKey) {
-//                 const recipientKeyPromise = getUserKeyByUsername(username);
-//                 recipientKeyPromise.then(function (recipientKey) {
-//                     const existingChatPromise = existingChat([currentUser.username, username]);
-//                     existingChatPromise.then(function (exists) {
-//                         if (exists) {
-//                             // console.log("EXISTING");
-//                             addChatKeyToUser(username, currentUser.username);
-//                         }
-//                         else {
-//                             const chatKey = createNewChat(currentUser.username, username);
-//                             // writeNewMessages("Chat sample", chatKey);
-//                             // console.log("NOT EXISTING");
-//                         }
-//                         loadChatRoom(recipientKey, username, currentUserKey);
-//                         openMessagesTab();
-//                     });
-//                 });
-//             });
-//         });
-//     }
-//     if (element.classList.contains('remove-friend-btn')) {
-//         const ulElement = element.parentElement;
-//         const dropdownElement = ulElement.parentElement;
-//         const friendTabElement = dropdownElement.parentElement;
-//         const username = friendTabElement.querySelector("span").textContent.trim();
-//         removeContact(username);
-//         friendTabElement.classList.add('hidden');
-//     }
-// });
+// Clicking behaviour in Contacts menu
+friendTabsBufferElement.addEventListener("click", (event) => {
+    const element = event.target;
+
+    // Contact requests management
+    if (element.classList.contains("accept-friend-request-btn")) {
+        const requestTabElement = element.parentElement;
+        const username = requestTabElement.querySelector("span").textContent.trim();
+        const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
+        utils.getCurrentUserKey().then(function (currentUserKey) {
+            acceptFriendRequest(username, profile_picture, currentUserKey);
+            requestTabElement.classList.add("hidden");
+        });
+    }
+    if (element.classList.contains("decline-friend-request-btn")) {
+        const requestTabElement = element.parentElement;
+        const username = requestTabElement.querySelector("span").textContent.trim();
+        const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
+        utils.getCurrentUserKey().then(function (currentUserKey) {
+            declineFriendRequest(username, profile_picture, currentUserKey);
+            requestTabElement.classList.add("hidden");
+        });
+    }
+
+    // Contacts menu options
+    if (element.classList.contains('three-dots-img')) {
+        const buttonElement = element.parentElement;
+        const friendTabElement = buttonElement.parentElement;
+        const dropdownElement = friendTabElement.querySelector(".friend-dropdown-settings");
+        if (dropdownElement.classList.contains('hidden')) {
+            dropdownElement.classList.remove('hidden');
+        }
+        else {
+            dropdownElement.classList.add('hidden');
+        }
+    }
+    if (element.classList.contains('new-chat-btn')) { 
+        const friendTabElement = element.parentElement.parentElement.parentElement;
+        const username = friendTabElement.querySelector("span").textContent.trim();
+        const currentUserUsernamePromise = utils.getCurrentUserData();
+        currentUserUsernamePromise.then(function (currentUser) {
+            const currentUserKeyPromise = utils.getCurrentUserKey();
+            currentUserKeyPromise.then(function (currentUserKey) {
+                const recipientKeyPromise = utils.getUserKeyByUsername(username);
+                recipientKeyPromise.then(function (recipientKey) {
+                    const existingChatPromise = existingChat([currentUser.username, username]);
+                    existingChatPromise.then(function (exists) {
+                        if (exists) {
+                            const isClearConnectionPromise = isClearConnection(currentUser.username, username);
+                            isClearConnectionPromise.then((connection) => {
+                                if(connection === true) {
+                                // console.log("READY TO CHAT!");
+                                // loadChatRoom(recipientKey, username, currentUserKey);
+                                // openMessagesTab();
+                                }
+                                else {
+                                // console.log("One user did not accept message request!");
+                                // sendMessageRequest(username, currentUser.username);
+                                // loadChatRoom(recipientKey, username, currentUserKey);
+                                // openMessagesTab();
+                                }
+                            });
+                        }
+                        else {
+                            const chatKey = createNewChat(currentUser.username, username);
+                            // console.log("Chat didn't exist! Created new chat!");
+                            // writeNewMessages("Chat sample", chatKey);
+                            // loadChatRoom(recipientKey, username, currentUserKey);
+                            // openMessagesTab();
+                        }
+                    });
+                });
+            });
+        });
+    }
+    // if (element.classList.contains('remove-friend-btn')) {
+    //     const ulElement = element.parentElement;
+    //     const dropdownElement = ulElement.parentElement;
+    //     const friendTabElement = dropdownElement.parentElement;
+    //     const username = friendTabElement.querySelector("span").textContent.trim();
+    //     removeContact(username);
+    //     friendTabElement.classList.add('hidden');
+    // }
+});
 
 // // Clicking behaviour in Contacts menu
-// chatTabsBufferElement.addEventListener("click", (event) => {
-//     const element = event.target;
-//     if (element.classList.contains('three-dots-img')) {
-//         const buttonElement = element.parentElement;
-//         const chatTabElement = buttonElement.parentElement;
-//         const dropdownElement = chatTabElement.querySelector(".chat-dropdown-settings");
-//         if (dropdownElement.classList.contains('hidden')) {
-//             dropdownElement.classList.remove('hidden');
+chatTabsBufferElement.addEventListener("click", (event) => {
+    const element = event.target;
+    
+    // Chat requests management
+    if (element.classList.contains("accept-chat-request-btn")) {
+        const requestTabElement = element.parentElement;
+        const username = requestTabElement.querySelector("span").textContent.trim();
+        const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
+        utils.getCurrentUserKey().then(function (currentUserKey) {
+            acceptChatRequest(username, profile_picture, currentUserKey);
+            requestTabElement.classList.add("hidden");
+        });
+    }
+    if (element.classList.contains("decline-chat-request-btn")) {
+        const requestTabElement = element.parentElement;
+        const username = requestTabElement.querySelector("span").textContent.trim();
+        const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
+        utils.getCurrentUserKey().then(function (currentUserKey) {
+            declineChatRequest(username, profile_picture, currentUserKey);
+            requestTabElement.classList.add("hidden");
+        });
+    }
 
-//         }
-//         else {
-//             dropdownElement.classList.add('hidden');
-//         }
-//     }
-//     if (element.classList.contains('chat-tab')) {
-//         const child = element.childNodes;
-//         let recipientUsername = child[3].childNodes[1].querySelector("span").textContent.trim();
-//         loadChatRoomFromChatTab(recipientUsername);
-//     }
-//     if (element.classList.contains('remove-chat-btn')) {
-//         const ulElement = element.parentElement;
-//         const dropdownElement = ulElement.parentElement;
-//         const chatTabElement = dropdownElement.parentElement;
-//         const username = chatTabElement.querySelector("span").textContent.trim();
-//         removeChat(username);
-//         chatTabElement.classList.add('hidden');
-//     }
-// });
+    // if (element.classList.contains('three-dots-img')) {
+    //     const buttonElement = element.parentElement;
+    //     const chatTabElement = buttonElement.parentElement;
+    //     const dropdownElement = chatTabElement.querySelector(".chat-dropdown-settings");
+    //     if (dropdownElement.classList.contains('hidden')) {
+    //         dropdownElement.classList.remove('hidden');
+
+    //     }
+    //     else {
+    //         dropdownElement.classList.add('hidden');
+    //     }
+    // }
+    // if (element.classList.contains('chat-tab')) {
+    //     const child = element.childNodes;
+    //     let recipientUsername = child[3].childNodes[1].querySelector("span").textContent.trim();
+    //     loadChatRoomFromChatTab(recipientUsername);
+    // }
+    // if (element.classList.contains('remove-chat-btn')) {
+    //     const ulElement = element.parentElement;
+    //     const dropdownElement = ulElement.parentElement;
+    //     const chatTabElement = dropdownElement.parentElement;
+    //     const username = chatTabElement.querySelector("span").textContent.trim();
+    //     removeChat(username);
+    //     chatTabElement.classList.add('hidden');
+    // }
+});

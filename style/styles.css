@@ -130,7 +130,8 @@ ul {
 }
 
 #log-out-btn:hover {
-    /* to do */
+    transition: 0.5s;
+    color: #CDE0C9;
 }
 
 #menu {
@@ -158,6 +159,7 @@ ul {
     min-width: 85%;
     max-width: 85%;
     cursor:pointer;
+    transition: 0.25s;
 }
 
 .menu-option span {
@@ -381,6 +383,17 @@ ul {
     font-weight: bold;
     font-size: 1em;
     color: #2C6975;
+    cursor: pointer;
+}
+
+.filter-btn.current-filter {
+    border-bottom: 2px solid #2C6975;
+}
+
+.filter-btn:hover {
+    color: #6BB2AD;
+    border-color: #6BB2AD;
+    transition: 0.125s;
 }
 
 #friend-requests-count {
@@ -395,10 +408,6 @@ ul {
     border: 1px solid #FF0000;
     border-radius: 100%;
     background-color: #FF0000;
-}
-
-.filter-btn.current-filter {
-    border-bottom: 2px solid #2C6975;
 }
 
 /* .tabs-buffer {
@@ -447,6 +456,30 @@ ul {
     background-color: #E0ECDE;
     transition: 0.25s;
     cursor: pointer;
+}
+
+.chat-request-option-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25%;
+    height: 30px;
+    border-radius: 20px;
+    background: #6BB2AD;
+    font-size: 0.75em;
+    color: #2C6975;
+    background: transparent;
+    border: 1px solid #2C6975;
+    cursor: pointer;
+    margin: 5px;
+    padding: 5px;
+    box-shadow: #2C6975 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+}
+
+.chat-request-option-btn:hover {
+    background: #2C6975;
+    color: #E0ECDE;
+    transition: 0.1s;
 }
 
 .user-profile-pic {
