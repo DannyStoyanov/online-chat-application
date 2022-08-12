@@ -396,10 +396,10 @@ ul {
     transition: 0.125s;
 }
 
-#friend-requests-count {
+#friend-requests-count, #chat-requests-count {
     position: absolute;
     top: 21.5%;
-    left: 35%;
+    left: 35.75%;
     width: 12.5px;
     height: 12.5px;
     font-size: 0.55em;
@@ -408,7 +408,7 @@ ul {
     border: 1px solid #FF0000;
     border-radius: 100%;
     background-color: #FF0000;
-}
+} 
 
 /* .tabs-buffer {
     position: relative;
@@ -450,12 +450,27 @@ ul {
     box-shadow: #2C6975 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
-.chat-tab:hover {
+.chat-tab:hover, .chat-request-tab:hover {
     width: 92.5%;
     min-height: 5rem;
     background-color: #E0ECDE;
     transition: 0.25s;
     cursor: pointer;
+}
+
+.chat-request-tab {
+    width: 90%;
+    min-height: 5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px;
+    margin: 0.5rem;
+
+    background-color: #6BB2AD;
+    border-radius: 5px;
+    box-shadow: #2C6975 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
 .chat-request-option-btn {
@@ -533,7 +548,22 @@ ul {
     box-shadow: #2C6975 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
-.friend-tab:hover {
+.friend-request-tab {
+    width: 90%;
+    min-height: 5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 2px;
+    margin: 0.5rem;
+
+    background-color: #6BB2AD;
+    border-radius: 5px;
+    box-shadow: #2C6975 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+}
+
+.friend-tab:hover, .friend-request-tab:hover {
     width: 92.5%;
     min-height: 5rem;
     background-color: #E0ECDE;

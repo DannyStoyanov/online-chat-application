@@ -347,7 +347,7 @@ export async function loadMessageRequests() {
             const requesterKey = await utils.getUserKeyByUsername(requester);
             const requesterData = await utils.getUserByKey(requesterKey);
             chatTabsBufferElement.innerHTML += `
-            <div class="chat-tab">
+            <div class="chat-request-tab">
                 <img src="${requesterData.profile_picture}" class="user-profile-pic" alt="user_logo" />
                 <span class="username">${requesterData.username}</span>
                 <button class="chat-request-option-btn accept-chat-request-btn">Accept</button>

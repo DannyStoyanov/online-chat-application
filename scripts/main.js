@@ -49,6 +49,8 @@ const friendTabsBufferElement = document.getElementById('friend-tabs');
 const friendRequestsCountElement = document.getElementById('friend-requests-count');
 const chatRoomElement = document.getElementById('chat-room');
 const chatTabsBufferElement = document.getElementById('chat-tabs');
+const chatRequestsCountElement = document.getElementById('chat-requests-count');
+
 
 // Default onload page state
 window.addEventListener('load', (event) => {
@@ -121,6 +123,28 @@ utils.getCurrentUserKey().then(function (currentUserKey) {
     });
 });
 
+// Indicator - number of chat requests
+utils.getCurrentUserKey().then(function (currentUserKey) {
+    const contactsRef = ref(database, 'users/' + currentUserKey + '/chats/');
+    onValue(contactsRef, (snapshot) => {
+        var requestsCount = 0;
+        const data = snapshot.val();
+        for (var userId in data) {
+            const isFriend = data[userId];
+            if (isFriend === false) {
+                ++requestsCount;
+            }
+        }
+        if (requestsCount !== 0) {
+            chatRequestsCountElement.classList.remove("hidden");
+            chatRequestsCountElement.innerText = requestsCount;
+        }
+        else {
+            chatRequestsCountElement.classList.add("hidden");
+        }
+    });
+});
+
 // Load user info
 function loadCurrentUserData(data) {
     const profilePictureElement = document.getElementById('user-profile-pic');
@@ -139,9 +163,8 @@ function openMessagesTab() {
 
     chatListElement.classList.remove('hidden');
     friendListElement.classList.add('hidden');
-    showAllChats();
+    resetMessagesTab();
     updateTitle();
-    // showAllChats(); // #TODO: NEED REWORK
 }
 
 // Menu option behaviour - Messages
@@ -157,7 +180,7 @@ function openContactsTab() {
 
     friendListElement.classList.remove('hidden');
     chatListElement.classList.add('hidden');
-    showAllFriends(); // #TODO: NEED REWORK
+    resetContactsTab();
     updateTitle();
 }
 
@@ -188,14 +211,18 @@ logOutButtonElement.addEventListener('click', (event) => {
 
 // Chat filter settings:
 
-// Filter all messages
-filterAllMessagesButtonElement.addEventListener('click', (event) => {
+function resetMessagesTab() {
     filterAllMessagesButtonElement.classList.add('current-filter');
     showAllChats();
 
     // filterUnreadMessagesButtonElement.classList.remove('current-filter');
     // filterGroupsMessagesButtonElement.classList.remove('current-filter');
     filterRequestsMessagesButtonElement.classList.remove('current-filter');
+}
+
+// Filter all messages
+filterAllMessagesButtonElement.addEventListener('click', (event) => {
+    resetMessagesTab();
 });
 
 // // Filter unread messages
@@ -228,12 +255,16 @@ filterRequestsMessagesButtonElement.addEventListener('click', (event) => {
 
 // Contact filter settings
 
-// Filter all contacts
-filterAllContactsButtonElement.addEventListener('click', (event) => {
+function resetContactsTab() {
     filterAllContactsButtonElement.classList.add('current-filter');
     showAllFriends();
 
     filterRequestContactsButtonElement.classList.remove('current-filter');
+}
+
+// Filter all contacts
+filterAllContactsButtonElement.addEventListener('click', (event) => {
+    resetContactsTab();
 });
 
 // Filter contacts requests
@@ -330,7 +361,7 @@ async function showFriendRequests() {
         const isFriend = data[userId];
         if (isFriend === false) {
             friendTabsBufferElement.innerHTML += `
-            <div class="friend-tab">
+            <div class="friend-request-tab">
                 <img src="${users[userId].profile_picture}" class="user-profile-pic" alt="user_logo" />
                 <span class="username">${users[userId].username}</span>
                 <button class="friend-request-option-btn accept-friend-request-btn">Accept</button>
