@@ -179,6 +179,8 @@ export function createNewChat(senderUsername, username) {
     const chatKey = newChatRef.key;
     set(ref(database, "chats/" + chatKey), {
         "name": username,
+        "sender": senderUsername,
+        "recipient": username,
         "members": [senderUsername, username],
         // "private": true,
         "messages": [{ // {
@@ -273,11 +275,7 @@ async function deleteChatInUserData(userKey, chatKey) {
         return undefined;
     }
     var newChats = user.chats;
-    for (var i in newChats) {
-        if (newChats[i] === chatKey) {
-            delete newChats[i];
-        }
-    }
+    delete newChats[`${chatKey}`];
     var updates = {};
     updates["users/" + userKey + "/chats/"] = newChats;
     update(ref(database), updates);
@@ -303,8 +301,7 @@ export async function deleteChat(members) {
             for (var i in members) {
                 const userKey = await utils.getUserKeyByUsername(members[i]);
                 deleteChatInUserData(userKey, key);
-                console.log(userKey, key);
-                loadDefaultChat();
+                // loadDefaultChat();
             }
             return undefined;
         }
@@ -390,6 +387,13 @@ export async function showAllChats() {
             if (chatData.name === "Fluffster Team") {
                 continue;
             }
+            var chatName;
+            if(user.username === chatData.sender) {
+                chatName = chatData.recipient;
+            }
+            else {
+                chatName = chatData.sender;
+            }
             let recipientKey = await utils.getUserKeyByUsername(chatData.name);
             if (recipientKey === undefined) {
                 return undefined;
@@ -402,7 +406,7 @@ export async function showAllChats() {
                     <img src="${profile_picture}" class="user-profile-pic" alt="user_logo" />
                     <div class="chat-preview">
                         <div class="message-info">
-                            <span class="username">${chatData.name}</span>
+                            <span class="username">${chatName}</span>
                             <span class="time-sent">${displayDate}</span>
                         </div>
                         <span class="message-preview">${lastMessage.split(' ').slice(0, 5).join(' ')}...</span>
@@ -511,8 +515,8 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
     let currentUser = await utils.getCurrentUserData();
     var chatKey;
     for (var i in currentUser.chats) {
-        if (containsElement(currentUser.chats[i], recipient.chats) === true) {
-            chatKey = currentUser.chats[i];
+        if (containsElement(i, Object.keys(recipient.chats)) === true) {
+            chatKey = i;
             sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
             return undefined;
         }

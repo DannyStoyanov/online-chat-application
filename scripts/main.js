@@ -163,7 +163,7 @@ function openMessagesTab() {
 
     chatListElement.classList.remove('hidden');
     friendListElement.classList.add('hidden');
-    resetMessagesTab();
+    defaultMessagesTab();
     updateTitle();
 }
 
@@ -180,7 +180,7 @@ function openContactsTab() {
 
     friendListElement.classList.remove('hidden');
     chatListElement.classList.add('hidden');
-    resetContactsTab();
+    defaultContactsTab();
     updateTitle();
 }
 
@@ -211,7 +211,7 @@ logOutButtonElement.addEventListener('click', (event) => {
 
 // Chat filter settings:
 
-function resetMessagesTab() {
+function defaultMessagesTab() {
     filterAllMessagesButtonElement.classList.add('current-filter');
     showAllChats();
 
@@ -222,7 +222,7 @@ function resetMessagesTab() {
 
 // Filter all messages
 filterAllMessagesButtonElement.addEventListener('click', (event) => {
-    resetMessagesTab();
+    defaultMessagesTab();
 });
 
 // // Filter unread messages
@@ -255,7 +255,7 @@ filterRequestsMessagesButtonElement.addEventListener('click', (event) => {
 
 // Contact filter settings
 
-function resetContactsTab() {
+function defaultContactsTab() {
     filterAllContactsButtonElement.classList.add('current-filter');
     showAllFriends();
 
@@ -264,7 +264,7 @@ function resetContactsTab() {
 
 // Filter all contacts
 filterAllContactsButtonElement.addEventListener('click', (event) => {
-    resetContactsTab();
+    defaultContactsTab();
 });
 
 // Filter contacts requests
@@ -549,15 +549,15 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                             const isClearConnectionPromise = isClearConnection(currentUser.username, username);
                             isClearConnectionPromise.then((connection) => {
                                 if(connection === true) {
-                                // console.log("READY TO CHAT!");
-                                // loadChatRoom(recipientKey, username, currentUserKey);
-                                // openMessagesTab();
+                                    // console.log("READY TO CHAT!");
+                                    loadChatRoom(recipientKey, username, currentUserKey);
+                                    openMessagesTab();
                                 }
                                 else {
-                                // console.log("One user did not accept message request!");
-                                // sendMessageRequest(username, currentUser.username);
-                                // loadChatRoom(recipientKey, username, currentUserKey);
-                                // openMessagesTab();
+                                    // console.log("One user did not accept message request!");
+                                    // sendMessageRequest(username, currentUser.username);
+                                    loadChatRoom(recipientKey, username, currentUserKey);
+                                    openMessagesTab();
                                 }
                             });
                         }
@@ -565,22 +565,22 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                             const chatKey = createNewChat(currentUser.username, username);
                             // console.log("Chat didn't exist! Created new chat!");
                             // writeNewMessages("Chat sample", chatKey);
-                            // loadChatRoom(recipientKey, username, currentUserKey);
-                            // openMessagesTab();
+                            loadChatRoom(recipientKey, username, currentUserKey);
+                            openMessagesTab();
                         }
                     });
                 });
             });
         });
     }
-    // if (element.classList.contains('remove-friend-btn')) {
-    //     const ulElement = element.parentElement;
-    //     const dropdownElement = ulElement.parentElement;
-    //     const friendTabElement = dropdownElement.parentElement;
-    //     const username = friendTabElement.querySelector("span").textContent.trim();
-    //     removeContact(username);
-    //     friendTabElement.classList.add('hidden');
-    // }
+    if (element.classList.contains('remove-friend-btn')) {
+        const ulElement = element.parentElement;
+        const dropdownElement = ulElement.parentElement;
+        const friendTabElement = dropdownElement.parentElement;
+        const username = friendTabElement.querySelector("span").textContent.trim();
+        removeContact(username);
+        friendTabElement.classList.add('hidden');
+    }
 });
 
 // // Clicking behaviour in Contacts menu
