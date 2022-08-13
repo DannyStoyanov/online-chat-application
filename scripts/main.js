@@ -57,7 +57,6 @@ window.addEventListener('load', (event) => {
     createDefaultChat();
 
     friendListElement.classList.add('hidden');
-    showAllChats();
 
     friendListButtonElement.classList.remove('active-menu-option');
     chatListButtonElement.classList.add('active-menu-option');
@@ -67,6 +66,7 @@ window.addEventListener('load', (event) => {
 
     // Load current user data
     loadCurrentUser();
+    showAllChats();
 
     // Messages default filter
     filterAllMessagesButtonElement.classList.add('current-filter');
@@ -281,7 +281,7 @@ filterRequestContactsButtonElement.addEventListener('click', (event) => {
 searchInputElement.addEventListener('change', (event) => {
     var anySearchResults = false;
     searchResultBufferWrapperElement.classList.remove("hidden");
-    searchResultBufferElement.innerHTML = `<button class="escape-search-results-btn">x</button>`;
+    searchResultBufferElement.innerHTML = `<button class="escape-search-results-btn">Close</button>`;
     const usersPromise = utils.getUsers();
     usersPromise.then(function (users) {
         if (users) {
@@ -555,9 +555,12 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                                 }
                                 else {
                                     // console.log("One user did not accept message request!");
-                                    // sendMessageRequest(username, currentUser.username);
-                                    loadChatRoom(recipientKey, username, currentUserKey);
-                                    openMessagesTab();
+                                    sendMessageRequest(username, currentUser.username);
+                                    utils.getUserByKey(recipientKey).then((recipientUser) => {
+                                        acceptChatRequest(username, recipientUser.profile_picture, currentUserKey);
+                                        loadChatRoom(recipientKey, username, currentUserKey);
+                                        openMessagesTab();
+                                    });
                                 }
                             });
                         }
@@ -607,29 +610,55 @@ chatTabsBufferElement.addEventListener("click", (event) => {
         });
     }
 
-    // if (element.classList.contains('three-dots-img')) {
-    //     const buttonElement = element.parentElement;
-    //     const chatTabElement = buttonElement.parentElement;
-    //     const dropdownElement = chatTabElement.querySelector(".chat-dropdown-settings");
-    //     if (dropdownElement.classList.contains('hidden')) {
-    //         dropdownElement.classList.remove('hidden');
+    if (element.classList.contains('three-dots-img')) {
+        const buttonElement = element.parentElement;
+        const chatTabElement = buttonElement.parentElement;
+        const dropdownElement = chatTabElement.querySelector(".chat-dropdown-settings");
+        if (dropdownElement.classList.contains('hidden')) {
+            dropdownElement.classList.remove('hidden');
 
-    //     }
-    //     else {
-    //         dropdownElement.classList.add('hidden');
-    //     }
-    // }
-    // if (element.classList.contains('chat-tab')) {
-    //     const child = element.childNodes;
-    //     let recipientUsername = child[3].childNodes[1].querySelector("span").textContent.trim();
-    //     loadChatRoomFromChatTab(recipientUsername);
-    // }
-    // if (element.classList.contains('remove-chat-btn')) {
-    //     const ulElement = element.parentElement;
-    //     const dropdownElement = ulElement.parentElement;
-    //     const chatTabElement = dropdownElement.parentElement;
-    //     const username = chatTabElement.querySelector("span").textContent.trim();
-    //     removeChat(username);
-    //     chatTabElement.classList.add('hidden');
+        }
+        else {
+            dropdownElement.classList.add('hidden');
+        }
+    }
+    if (element.classList.contains('chat-tab')) {
+        const child = element.childNodes;
+        let recipientUsername = child[3].childNodes[1].querySelector("span").textContent.trim();
+        loadChatRoomFromChatTab(recipientUsername);
+    }
+    if (element.classList.contains('remove-chat-btn')) {
+        const ulElement = element.parentElement;
+        const dropdownElement = ulElement.parentElement;
+        const chatTabElement = dropdownElement.parentElement;
+        const username = chatTabElement.querySelector("span").textContent.trim();
+        removeChat(username);
+        chatTabElement.classList.add('hidden');
+    }
+    // if(element.classList.contains('add-contact-to-chat-btn')) {
+    //     let contactUsername = prompt("Please enter your name");
+    //     var anySearchResults = false;
+    //     const usersPromise = utils.getUsers();
+    //     usersPromise.then(function (users) {
+    //         if (users) {
+    //             utils.getCurrentUserKey().then(function (currentUserKey) {
+    //                 for (var key in users) {
+    //                     if ((users[key].username === contactUsername) && key !== currentUserKey) {
+    //                         // #TODO: SHOULD LOOP THROUGH CHAT MEMBERS AND AVOID THEM
+    //                         utils.getCurrentUserData().then((currentUser) => {
+    //                             console.log(currentUser);
+    //                             anySearchResults = true;
+    //                             console.log("EXIST");
+    //                             dropdownElement.classList.add('hidden');
+    //                         });
+    //                     }
+    //                 }
+    //                 if (anySearchResults === false) {
+    //                     console.log("NOT EXISTING");
+    //                     dropdownElement.classList.add('hidden');
+    //                 }
+    //             });
+    //         }
+    //     });
     // }
 });
