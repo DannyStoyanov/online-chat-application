@@ -196,8 +196,8 @@ export function createNewChat(senderUsername, username) {
         console.error("chats.createNewChat(_): Couldn't write chat to database!");
     });
     sessionStorage.setItem("current-chat-key", JSON.stringify(newChatRef.key.trim()));
-    msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
     set(ref(database, "current-chat-key/"), chatKey);
+    msgsRef = ref(database, "chats/" + chatKey + "/messages/");
     
     addChatKeyToUsersDataViaUsernames(chatKey, username, senderUsername);
     return newChatRef.key;
@@ -208,7 +208,7 @@ async function setDefaultChatKeyToSessionStorage() {
     let user = await utils.getCurrentUserData();
     let chatKey = await getChatKey([user.username, "Fluffster Team"]);
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
-    msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
+    msgsRef = ref(database, "chats/" + chatKey + "/messages/");
     set(ref(database, "current-chat-key/"), chatKey);
 }
 
@@ -272,7 +272,7 @@ async function loadDefaultChat() {
     loadChatRoom(currentUserKey, "Fluffster Team", currentUserKey);
     let chatKey = await getChatKey([currentUser.username, "Fluffster Team"]);
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
-    msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
+    msgsRef = ref(database, "chats/" + chatKey + "/messages/");
     set(ref(database, "current-chat-key/"), chatKey);
 }
 
@@ -545,7 +545,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
         if (containsElement(key, Object.keys(recipient.chats)) === true) {
             chatKey = key;
             sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
-            msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
+            msgsRef = ref(database, "chats/" + chatKey + "/messages/");
             set(ref(database, "current-chat-key/"), chatKey);
             loadChatMessages();
             return undefined;
@@ -556,7 +556,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
         return undefined;
     }
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
-    msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
+    msgsRef = ref(database, "chats/" + chatKey + "/messages/");
     set(ref(database, "current-chat-key/"), chatKey);
     loadChatMessages();
 }
@@ -654,39 +654,39 @@ export async function loadChatMessages() {
     messageListElement.appendChild(listItem);
 }
 
-onChildAdded(msgsRef, (data) => { // onValue
-    console.log("TRIGGERED!");
-    // const messageListElement = document.getElementById('message-list');
-    // messageListElement.innerHTML = ``;
-    // const message = data.val();
-    // const listItem = document.createElement("li");
-    // const currentUserPromise = utils.getCurrentUserData();
-    // currentUserPromise.then(function (currentUser) {
-    //     if (message.username === currentUser.username) {
-    //         listItem.innerHTML += `
-    //     <div class="message-right messages">
-    //         <div>
-    //             <span class="message-username"><b>${message.username}</b></span>
-    //             <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-    //         </div>
-    //         <span class="message-text">${message.text}</span>
-    //     </div>
-    //     `;
-    //     }
-    //     else {
-    //         listItem.innerHTML += `
-    //     <div class="message-left messages">
-    //         <div>
-    //             <span class="message-username"><b>${message.username}</b></span>
-    //             <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-    //         <div>
-    //         <span class="message-text">${message.text}</span>
-    //     </div>
-    //     `;
-    //     }
-    // });
-    // console.log("appended!");
-    // messageListElement.appendChild(listItem);
+onValue(ref(database, "chats/"), (data) => { // onValue
+    getCurrentChatKey().then((key) => {
+        const messageListElement = document.getElementById('message-list');
+            const messages = data.val()[`${key}`].messages;
+            const message = messages[messages.length-1];
+            const listItem = document.createElement("li");
+            const currentUserPromise = utils.getCurrentUserData();
+            currentUserPromise.then(function (currentUser) {
+                if (message.username === currentUser.username) {
+                    listItem.innerHTML += `
+                <div class="message-right messages">
+                    <div>
+                        <span class="message-username"><b>${message.username}</b></span>
+                        <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                    </div>
+                    <span class="message-text">${message.text}</span>
+                </div>
+                `;
+                }
+                else {
+                    listItem.innerHTML += `
+                <div class="message-left messages">
+                    <div>
+                        <span class="message-username"><b>${message.username}</b></span>
+                        <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                    <div>
+                    <span class="message-text">${message.text}</span>
+                </div>
+                `;
+                }
+            });
+            messageListElement.appendChild(listItem);   
+        });
 });
 
 // ---------------------------------------------------------------------------------------------------------------------
