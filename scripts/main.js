@@ -22,7 +22,7 @@ const database = getDatabase(app);
 const usersRef = ref(database, "users/");
 
 // imports:
-import { existingChat, createNewChat, loadChatRoom, deleteChat, showAllChats, loadChatRoomFromChatTab, removeChat, sendMessageRequest, renameFirstChat, createDefaultChat, loadMessageRequests, acceptChatRequest, declineChatRequest, isClearConnection  } from "./chats.js";
+import { existingChat, createNewChat, loadChatRoom, deleteChat, showAllChats, loadChatRoomFromChatTab, removeChat, sendMessageRequest, renameFirstChat, createDefaultChat, loadMessageRequests, acceptChatRequest, declineChatRequest, isClearConnection } from "./chats.js";
 import * as utils from "./utils.js";
 
 // Session storage
