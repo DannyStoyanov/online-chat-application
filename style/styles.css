@@ -15,6 +15,10 @@ Colours:
 
 Transition colours:
 #4c8e92
+
+Other colours:
+#7600bc
+#000080
 */
 
 body {
@@ -461,7 +465,7 @@ ul {
 
 .tabs-wrapper {
     width: 100%;
-    height: 100%;
+    height: 90%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -675,7 +679,7 @@ ul {
 .friend-dropdown-settings, .chat-dropdown-settings {
     border: 1px solid black;
     border-radius: 5px;
-    position: absolute;
+    position: relative;
     text-align: center;
     display: flex;
     flex-direction: column;
