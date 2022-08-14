@@ -465,7 +465,8 @@ ul {
 }
 
 .chat-tab {
-    min-width: 90%;
+    /* min-width: 90%; */
+    width: 90%;
     min-height: 5rem;
     display: flex;
     flex-direction: row;
@@ -785,17 +786,28 @@ ul {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    overflow: auto;
+    /* overflow-y: scroll; */
+}
+
+.message-right-li {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.message-left-li {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
 }
  
 .messages {
-    position: relative;
-    bottom: 0%;
-    width: 60%;
+    /* bottom: 0%; */
+    width: 25vw;
     height: auto;
     padding: 10px;
     border-radius: 20px;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 
 .message-right {

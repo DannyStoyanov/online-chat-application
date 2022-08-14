@@ -418,7 +418,7 @@ export async function showAllChats() {
             let empty = " ";
             var messageContent;
             if(lastMessage.length >= 40) {
-                messageContent = lastMessage.split('').slice(0, 40).join('') + "...";
+                messageContent = lastMessage.split('').slice(0, 30).join('') + "...";
             }
             else if(lastMessage.length >= 20 && lastMessage.split(' ').length < 5) {
                 messageContent = lastMessage.split(' ').slice(0, 3).join(' ') + "...";
@@ -621,40 +621,60 @@ sendMessageBtnElement.addEventListener("click", event => {
 });
 
 export async function loadChatMessages() {
-    const messageListElement = document.getElementById('message-list');
+    var messageListElement = document.getElementById('message-list');
     messageListElement.innerHTML = ``;
-    const listItem = document.createElement("li");
     let currentUser = await utils.getCurrentUserData();
     let chat = await getCurrentChat();
+    if(chat === undefined) {
+        return undefined;
+    }
     for(var i in chat.messages) {
         var message = chat.messages[i];
+        const listItem = document.createElement("li");
+        if(message.username === "Fluffster team") {
+            continue;
+        }
         if (message.username === currentUser.username) {
-            listItem.innerHTML += `
-        <div class="message-right messages">
-            <div>
-                <span class="message-username"><b>${message.username}</b></span>
-                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+            listItem.innerHTML = `
+            <div class="message-wrapper">
+                <div class="message-right messages">
+                    <div>
+                        <span class="message-username"><b>${message.username}</b></span>
+                        <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                    </div>
+                    <span class="message-text">${message.text}</span>
+                </div>
+                <div class="message-space-filler">
+                </div>
             </div>
-            <span class="message-text">${message.text}</span>
-        </div>
         `;
+        listItem.setAttribute("class", "message-right-li");
         }
         else {
-            listItem.innerHTML += `
-        <div class="message-left messages">
-            <div>
-                <span class="message-username"><b>${message.username}</b></span>
-                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-            <div>
-            <span class="message-text">${message.text}</span>
-        </div>
+            listItem.innerHTML = `
+            <div class="message-wrapper">
+                <div class="message-left messages">
+                    <div>
+                        <span class="message-username"><b>${message.username}</b></span>
+                        <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                    <div>
+                    <span class="message-text">${message.text}</span>
+                </div>
+                <div class="message-space-filler">
+                </div>
+            </div>
         `;
+        listItem.setAttribute("class", "message-left-li");
         }
+        messageListElement.appendChild(listItem);
+        messageListElement.scrollTop = messageListElement.scrollHeight;
     }
-    messageListElement.appendChild(listItem);
 }
 
 onValue(ref(database, "chats/"), (data) => { // onValue
+    if(data === undefined) {
+        return undefined;
+    }
     getCurrentChatKey().then((key) => {
         const messageListElement = document.getElementById('message-list');
             const messages = data.val()[`${key}`].messages;
@@ -664,28 +684,39 @@ onValue(ref(database, "chats/"), (data) => { // onValue
             currentUserPromise.then(function (currentUser) {
                 if (message.username === currentUser.username) {
                     listItem.innerHTML += `
-                <div class="message-right messages">
-                    <div>
-                        <span class="message-username"><b>${message.username}</b></span>
-                        <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                    <div class="message-wrapper">
+                        <div class="message-right messages">
+                            <div>
+                                <span class="message-username"><b>${message.username}</b></span>
+                                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                            </div>
+                            <span class="message-text">${message.text}</span>
+                        </div>
+                        <div class="message-space-filler">
+                        </div>
                     </div>
-                    <span class="message-text">${message.text}</span>
-                </div>
                 `;
+                listItem.setAttribute("class", "message-right-li");
                 }
                 else {
                     listItem.innerHTML += `
-                <div class="message-left messages">
-                    <div>
-                        <span class="message-username"><b>${message.username}</b></span>
-                        <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-                    <div>
-                    <span class="message-text">${message.text}</span>
-                </div>
+                    <div class="message-wrapper">
+                        <div class="message-left messages">
+                            <div>
+                                <span class="message-username"><b>${message.username}</b></span>
+                                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                            <div>
+                            <span class="message-text">${message.text}</span>
+                        </div>
+                        <div class="message-space-filler">
+                        </div>
+                    </div>
                 `;
+                listItem.setAttribute("class", "message-left-li");
                 }
             });
-            messageListElement.appendChild(listItem);   
+            messageListElement.appendChild(listItem);
+            messageListElement.scrollTop = messageListElement.scrollHeight;
         });
 });
 
