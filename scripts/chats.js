@@ -188,7 +188,7 @@ export function createNewChat(senderUsername, username) {
         "messages": [{ // {
             "username": `Fluffster team`,
             "date": Date.now(),
-            "text": "Welcome!",
+            "text": "New chat",
         }] // }
     }).then(() => {
         // console.log("Data saved successfully");
@@ -694,6 +694,9 @@ onValue(ref(database, "chats/"), (data) => { // onValue
         const messageListElement = document.getElementById('message-list');
             const messages = data.val()[`${key}`].messages;
             const message = messages[messages.length-1];
+            if(message.username === "Fluffster team") {
+                return undefined;
+            }
             const listItem = document.createElement("li");
             const currentUserPromise = utils.getCurrentUserData();
             currentUserPromise.then(function (currentUser) {
