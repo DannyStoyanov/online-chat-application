@@ -354,10 +354,16 @@ export async function loadMessageRequests() {
             const requesterData = await utils.getUserByKey(requesterKey);
             chatTabsBufferElement.innerHTML += `
             <div class="chat-request-tab">
-                <img src="${requesterData.profile_picture}" class="user-profile-pic" alt="user_logo" />
-                <span class="username">${requesterData.username}</span>
-                <button class="chat-request-option-btn accept-chat-request-btn">Accept</button>
-                <button class="chat-request-option-btn decline-chat-request-btn">Decline</button>
+                <div class="chat-request-profile-pic-wrapper">
+                    <img src="${requesterData.profile_picture}" class="user-profile-pic" alt="user_logo" />
+                </div>
+                <div class="chat-request-username-wrapper">
+                    <span class="username">${requesterData.username}</span>
+                </div>
+                <div class="chat-request-option-btns-wrapper">
+                    <button class="chat-request-option-btn accept-chat-request-btn">Accept</button>
+                    <button class="chat-request-option-btn decline-chat-request-btn">Decline</button>
+                </div>
             </div>
             `;
         }
@@ -393,7 +399,7 @@ export async function showAllChats() {
             let displayDate = date.getDate() +
                 "." + (date.getMonth() + 1) +
                 "." + date.getFullYear() +
-                "\n" + date.getHours() +
+                " " + date.getHours() +
                 ":" + date.getMinutes();
             let lastMessage = chatData.messages[(chatData.messages.length) - 1].text;
             if (containsElement("Fluffster Team", chatData.name) === true) {
@@ -596,8 +602,9 @@ var msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
 //     msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
 // });
 
-sendMessageBtnElement.addEventListener("click", event => {
-    if(messageInputElement.value === "") {
+function proccessInput() {
+    console.log(messageInputElement.value.trim());
+    if(messageInputElement.value.trim() === "") {
         return undefined;
     }
     const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
@@ -618,6 +625,14 @@ sendMessageBtnElement.addEventListener("click", event => {
             messageInputElement.value = "";
         });
     });
+}
+
+sendMessageBtnElement.addEventListener("click", event => {
+    proccessInput();
+});
+
+messageInputElement.addEventListener("change", event => {
+    proccessInput();
 });
 
 export async function loadChatMessages() {
@@ -721,62 +736,23 @@ onValue(ref(database, "chats/"), (data) => { // onValue
 });
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-
-// // Messages
-// const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
-// const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
-// const messageInputElement = document.getElementById('message-input');
-// // const sendMessageBtnElement = document.getElementById('send-message-btn');
-
-// // sendMessageBtnElement.addEventListener("click", event => {
-// //     const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
-// //     console.log(currentChatKey);
-// //     const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
-// //     console.log(msgsRef);
-// //     const messageRef = push(msgsRef);
-// //     const currentUserPromise = utils.getCurrentUserData(); // await?
-// //     currentUserPromise.then(function(currentUser) {
-// //         set(messageRef, {
-// //             "username": currentUser.username,
-// //             "date": Date.now(),
-// //             "text": messageInputElement.value,
-// //         });
-// //      messageInputElement.value = "";
-// //     });
-// // });
-
-// onChildAdded(msgsRef, (data) => {
-//     const messageListElement = document.getElementById('message-list');
-//     const message = data.val();
-//     const listItem = document.createElement("li");
-//     const currentUserPromise = utils.getCurrentUserData();
-//     currentUserPromise.then(function (currentUser) {
-//         if (message.username === currentUser.username) {
-//             listItem.innerHTML = `
-//         <div class="message-right messages">
-//             <div>
-//                 <span class="message-username"><b>${message.username}</b></span>
-//                 <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-//             </div>
-//             <span class="message-text">${message.text}</span>
-//         </div>
-//         `;
-//         }
-//         else {
-//             listItem.innerHTML = `
-//         <div class="message-left messages">
-//             <div>
-//                 <span class="message-username"><b>${message.username}</b></span>
-//                 <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-//             <div>
-//             <span class="message-text">${message.text}</span>
-//         </div>
-//         `;
-//         }
+// sendMessageBtnElement.addEventListener("click", event => {
+//     const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
+//     console.log(currentChatKey);
+//     const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
+//     console.log(msgsRef);
+//     const messageRef = push(msgsRef);
+//     const currentUserPromise = utils.getCurrentUserData(); // await?
+//     currentUserPromise.then(function(currentUser) {
+//         set(messageRef, {
+//             "username": currentUser.username,
+//             "date": Date.now(),
+//             "text": messageInputElement.value,
+//         });
+//      messageInputElement.value = "";
 //     });
-//     messageListElement.appendChild(listItem);
 // });
+
 
 // ---------------------------------------------------------------------------------------------------------------------
 

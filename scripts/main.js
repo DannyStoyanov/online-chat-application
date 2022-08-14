@@ -360,12 +360,25 @@ async function showFriendRequests() {
     for (var userId in data) {
         const isFriend = data[userId];
         if (isFriend === false) {
+            var username;
+            if(users[userId].username.length >= 15) {
+                username = users[userId].username.split('').slice(0, 15).join('') + "...";
+            }
+            else {
+                username = users[userId].username;
+            }
             friendTabsBufferElement.innerHTML += `
             <div class="friend-request-tab">
-                <img src="${users[userId].profile_picture}" class="user-profile-pic" alt="user_logo" />
-                <span class="username">${users[userId].username}</span>
-                <button class="friend-request-option-btn accept-friend-request-btn">Accept</button>
-                <button class="friend-request-option-btn decline-friend-request-btn">Decline</button>
+                <div class="friend-request-profile-pic-wrapper">
+                    <img src="${users[userId].profile_picture}" class="user-profile-pic" alt="user_logo" />
+                </div>
+                <div class="friend-request-username-wrapper">
+                    <span class="username">${username}</span>
+                </div>
+                <div class="friend-request-option-btns-wrapper">
+                    <button class="friend-request-option-btn accept-friend-request-btn">Accept</button>
+                    <button class="friend-request-option-btn decline-friend-request-btn">Decline</button>
+                </div>
             </div>
             `;
         }
@@ -504,7 +517,7 @@ friendTabsBufferElement.addEventListener("click", (event) => {
 
     // Contact requests management
     if (element.classList.contains("accept-friend-request-btn")) {
-        const requestTabElement = element.parentElement;
+        const requestTabElement = element.parentElement.parentElement;
         const username = requestTabElement.querySelector("span").textContent.trim();
         const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
         utils.getCurrentUserKey().then(function (currentUserKey) {
@@ -513,7 +526,7 @@ friendTabsBufferElement.addEventListener("click", (event) => {
         });
     }
     if (element.classList.contains("decline-friend-request-btn")) {
-        const requestTabElement = element.parentElement;
+        const requestTabElement = element.parentElement.parentElement;
         const username = requestTabElement.querySelector("span").textContent.trim();
         const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
         utils.getCurrentUserKey().then(function (currentUserKey) {
@@ -592,7 +605,7 @@ chatTabsBufferElement.addEventListener("click", (event) => {
     
     // Chat requests management
     if (element.classList.contains("accept-chat-request-btn")) {
-        const requestTabElement = element.parentElement;
+        const requestTabElement = element.parentElement.parentElement;
         const username = requestTabElement.querySelector("span").textContent.trim();
         const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
         utils.getCurrentUserKey().then(function (currentUserKey) {
@@ -601,7 +614,7 @@ chatTabsBufferElement.addEventListener("click", (event) => {
         });
     }
     if (element.classList.contains("decline-chat-request-btn")) {
-        const requestTabElement = element.parentElement;
+        const requestTabElement = element.parentElement.parentElement;
         const username = requestTabElement.querySelector("span").textContent.trim();
         const profile_picture = requestTabElement.querySelector("img").getAttribute("src");
         utils.getCurrentUserKey().then(function (currentUserKey) {
