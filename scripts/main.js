@@ -50,7 +50,7 @@ const friendRequestsCountElement = document.getElementById('friend-requests-coun
 const chatRoomElement = document.getElementById('chat-room');
 const chatTabsBufferElement = document.getElementById('chat-tabs');
 const chatRequestsCountElement = document.getElementById('chat-requests-count');
-
+const messageListElement = document.getElementById('message-list');
 
 // Default onload page state
 window.addEventListener('load', (event) => {
@@ -674,4 +674,52 @@ chatTabsBufferElement.addEventListener("click", (event) => {
     //         }
     //     });
     // }
+});
+
+messageListElement.addEventListener("click", (event) => {
+    const element = event.target;
+    
+    if (element.classList.contains('message-three-dots-img')) {
+        // const messageDivElement = element.parentElement;
+        // const username = messageDivElement.querySelector('.message-username').textContent.trim();
+        // const date = messageDivElement.querySelectorAll('span')[2].className;
+        // const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
+        // console.log(username);
+        // console.log(date);
+        // console.log(text);
+
+        // const messageDivWrapperElement = element.parentElement.parentElement.parentElement;
+        const messageDivElement = element.parentElement.parentElement;
+        const dropdownElement = messageDivElement.querySelector(".message-dropdown-settings");
+        if (dropdownElement.classList.contains('hidden')) {
+            dropdownElement.classList.remove('hidden');
+        }
+        else {
+            dropdownElement.classList.add('hidden');
+        }
+    }
+    if (element.classList.contains('edit-message-btn')) {
+        const messageDivElement = element.parentElement.parentElement.parentElement;
+        const username = messageDivElement.querySelector('.message-username').textContent.trim();
+        const date = messageDivElement.querySelectorAll('span')[2].className;
+        const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
+        console.log(username);
+        console.log(date);
+        console.log(text);
+
+        const dropdownElement = messageDivElement.querySelector(".message-dropdown-settings");
+        dropdownElement.classList.add('hidden');
+    }
+    if (element.classList.contains('delete-message-btn')) {
+        const messageDivElement = element.parentElement.parentElement.parentElement;
+        const username = messageDivElement.querySelector('.message-username').textContent.trim();
+        const date = messageDivElement.querySelectorAll('span')[2].className;
+        const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
+        console.log(username);
+        console.log(date);
+        console.log(text);
+
+        const dropdownElement = messageDivElement.querySelector(".message-dropdown-settings");
+        dropdownElement.classList.add('hidden');
+    }
 });

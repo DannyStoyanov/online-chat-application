@@ -332,7 +332,7 @@ ul {
     transition: 0.25s;
 }
 
-.friend-settings-btn, .chat-settings-btn{
+.friend-settings-btn, .chat-settings-btn {
     position: relative;
     top: -25px;
     right: 5px;
@@ -341,9 +341,20 @@ ul {
     cursor:pointer;
 }
 
+.message-settings-btn {
+    background: transparent;
+    border: none;
+    cursor:pointer;
+}
+
 .three-dots-img {
     width: 30px;
     height: 30px;
+}
+
+.message-three-dots-img {
+    width: 20px;
+    height: 20px;
 }
 
 .search-contact-tab {
@@ -662,14 +673,14 @@ ul {
     width: 20%;
 }
 
-.friend-dropdown-settings, .chat-dropdown-settings {
+.friend-dropdown-settings, .chat-dropdown-settings, .message-dropdown-settings  {
     border: 1px solid black;
     border-radius: 5px;
-    position: relative;
+    position: absolute;
     text-align: center;
     display: flex;
     flex-direction: column;
-    width: 16vw;
+    width: 10vw;
     height: 11.75vh;
     z-index: 2;
     background-color: #4c8e92;
@@ -682,7 +693,7 @@ ul {
     height: 100%;
 }
 
-.friend-setting-option, .chat-setting-option {
+.friend-setting-option, .chat-setting-option, .message-setting-option {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -690,19 +701,19 @@ ul {
     height: 50%;
 }
 
-.friend-setting-option:hover {
+.friend-setting-option:hover, .chat-setting-option:hover , .message-setting-option:hover  {
     background: #CDE0C9;
     color: #2C6975;
     transition: 0.25s;
     cursor: pointer;
 }
 
-.chat-setting-option:hover {
+/* .chat-setting-option:hover {
     background: #CDE0C9;
     color: #2C6975;
     transition: 0.25s;
     cursor: pointer;
-}
+} */
 
 .no-search-results {
     color:#E0ECDE;

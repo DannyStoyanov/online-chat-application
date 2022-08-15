@@ -603,7 +603,6 @@ var msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
 // });
 
 function proccessInput() {
-    console.log(messageInputElement.value.trim());
     if(messageInputElement.value.trim() === "") {
         return undefined;
     }
@@ -656,6 +655,14 @@ export async function loadChatMessages() {
                     <div>
                         <span class="message-username"><b>${message.username}</b></span>
                         <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                        <span class="${message.date}"></span>
+                        <div class="message-dropdown-settings hidden">
+                            <ul class="message-settings-list">
+                                <li class="message-setting-option edit-message-btn">Edit</li>
+                                <li class="message-setting-option delete-message-btn">Delete</li>
+                            </ul>
+                        </div>
+                        <button class="message-settings-btn"><img class="message-three-dots-img" src="./assets/icons/three_dots.png" alt="chat-settings-icon"/></button>
                     </div>
                     <span class="message-text">${message.text}</span>
                 </div>
@@ -703,16 +710,24 @@ onValue(ref(database, "chats/"), (data) => { // onValue
                 if (message.username === currentUser.username) {
                     listItem.innerHTML += `
                     <div class="message-wrapper">
-                        <div class="message-right messages">
-                            <div>
-                                <span class="message-username"><b>${message.username}</b></span>
-                                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                    <div class="message-right messages">
+                        <div>
+                            <span class="message-username"><b>${message.username}</b></span>
+                            <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                            <span class="${message.date}"></span>
+                            <div class="message-dropdown-settings hidden">
+                                <ul class="message-settings-list">
+                                    <li class="message-setting-option edit-message-btn">Edit</li>
+                                    <li class="message-setting-option delete-message-btn">Delete</li>
+                                </ul>
                             </div>
-                            <span class="message-text">${message.text}</span>
+                            <button class="message-settings-btn"><img class="message-three-dots-img" src="./assets/icons/three_dots.png" alt="chat-settings-icon"/></button>
                         </div>
-                        <div class="message-space-filler">
-                        </div>
+                        <span class="message-text">${message.text}</span>
                     </div>
+                    <div class="message-space-filler">
+                    </div>
+                </div>
                 `;
                 listItem.setAttribute("class", "message-right-li");
                 }
