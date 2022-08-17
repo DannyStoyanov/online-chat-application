@@ -114,7 +114,7 @@ export async function getChatKey(members) {
 // Get chat data by chat key
 async function getChatByKey(chatKey) {
     let chats = await getChats();
-    return chats[chatKey];
+    return chats[`${chatKey}`];
 }
 
 // Helper function for addChatKeyToUser
@@ -198,7 +198,7 @@ export function createNewChat(senderUsername, username) {
     sessionStorage.setItem("current-chat-key", JSON.stringify(newChatRef.key.trim()));
     set(ref(database, "current-chat-key/"), chatKey);
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-    
+
     addChatKeyToUsersDataViaUsernames(chatKey, username, senderUsername);
     return newChatRef.key;
 }
@@ -390,7 +390,7 @@ export async function showAllChats() {
     for (var i in chats) {
         var isApproved = chats[i];
         var chatData = chatsDatabase[i];
-        if(chatData === undefined) {
+        if (chatData === undefined) {
             return undefined;
         }
         if (isApproved === true) {
@@ -406,13 +406,13 @@ export async function showAllChats() {
                 continue;
             }
             var chatName;
-            if(user.username === chatData.sender) {
+            if (user.username === chatData.sender) {
                 chatName = chatData.recipient;
             }
             else {
                 chatName = chatData.sender;
             }
-            if(chatData.members.length >= 3) {
+            if (chatData.members.length >= 3) {
                 chatName = chatData.name;
             }
             let recipientKey = await utils.getUserKeyByUsername(chatName);
@@ -423,13 +423,13 @@ export async function showAllChats() {
             let profile_picture = recipient.profile_picture;
             let empty = " ";
             var messageContent;
-            if(lastMessage.length >= 40) {
+            if (lastMessage.length >= 40) {
                 messageContent = lastMessage.split('').slice(0, 30).join('') + "...";
             }
-            else if(lastMessage.length >= 20 && lastMessage.split(' ').length < 5) {
+            else if (lastMessage.length >= 20 && lastMessage.split(' ').length < 5) {
                 messageContent = lastMessage.split(' ').slice(0, 3).join(' ') + "...";
             }
-            else if(lastMessage.split(' ').length >= 5) {
+            else if (lastMessage.split(' ').length >= 5) {
                 messageContent = lastMessage.split(' ').slice(0, 5).join(' ') + "...";
             }
             else {
@@ -567,6 +567,10 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
     loadChatMessages();
 }
 
+// export async loadChatRoomByKey() {
+//     let user = await utils.getCurrentUserData();
+// }
+
 async function getCurrentChat() {
     // const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
     const currentChatKey = await getCurrentChatKey().then((key) => {
@@ -586,10 +590,25 @@ async function getCurrentChatKey() {
     return currentChatKey.val();
 }
 
+export function setIsModifiedDatabase(value) {
+    set(ref(database, "editedMessage/"), value);
+}
+
+export async function getIsModifiedDatabase(value) {
+    const dbRef = ref(getDatabase());
+    const snapshot = await get(child(dbRef, "editedMessage/"));
+    if (snapshot === undefined) {
+        console.error("chats.getIsModifiedDatabase(): Couldn't get data from database!");
+        return undefined;
+    }
+    return snapshot.val();
+}
+
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 // Messages
-const messageInputElement = document.getElementById('message-input');   
+const messageInputElement = document.getElementById('message-input');
 // const sendMessageBtnElement = document.getElementById('send-message-btn');
 const chatRoomTitle = document.getElementById('chat-room-header');
 const sendMessageBtnElement = document.getElementById('send-message-btn');
@@ -603,7 +622,7 @@ var msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
 // });
 
 function proccessInput() {
-    if(messageInputElement.value.trim() === "") {
+    if (messageInputElement.value.trim() === "") {
         return undefined;
     }
     const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
@@ -639,13 +658,13 @@ export async function loadChatMessages() {
     messageListElement.innerHTML = ``;
     let currentUser = await utils.getCurrentUserData();
     let chat = await getCurrentChat();
-    if(chat === undefined) {
+    if (chat === undefined) {
         return undefined;
     }
-    for(var i in chat.messages) {
+    for (var i in chat.messages) {
         var message = chat.messages[i];
         const listItem = document.createElement("li");
-        if(message.username === "Fluffster team") {
+        if (message.username === "Fluffster team") {
             continue;
         }
         if (message.username === currentUser.username) {
@@ -670,7 +689,7 @@ export async function loadChatMessages() {
                 </div>
             </div>
         `;
-        listItem.setAttribute("class", "message-right-li");
+            listItem.setAttribute("class", "message-right-li");
         }
         else {
             listItem.innerHTML = `
@@ -686,7 +705,7 @@ export async function loadChatMessages() {
                 </div>
             </div>
         `;
-        listItem.setAttribute("class", "message-left-li");
+            listItem.setAttribute("class", "message-left-li");
         }
         messageListElement.appendChild(listItem);
         messageListElement.scrollTop = messageListElement.scrollHeight;
@@ -694,64 +713,113 @@ export async function loadChatMessages() {
 }
 
 onValue(ref(database, "chats/"), (data) => { // onValue
-    if(data === undefined) {
-        return undefined;
-    }
-    getCurrentChatKey().then((key) => {
-        const messageListElement = document.getElementById('message-list');
-            const messages = data.val()[`${key}`].messages;
-            const message = messages[messages.length-1];
-            if(message.username === "Fluffster team") {
+    getIsModifiedDatabase().then((value) => {
+        if(value === true) {
+            setIsModifiedDatabase(false);
+            return undefined;
+        }
+        else {
+            if (data === undefined) {
                 return undefined;
             }
-            const listItem = document.createElement("li");
-            const currentUserPromise = utils.getCurrentUserData();
-            currentUserPromise.then(function (currentUser) {
-                if (message.username === currentUser.username) {
-                    listItem.innerHTML += `
-                    <div class="message-wrapper">
-                    <div class="message-right messages">
-                        <div>
-                            <span class="message-username"><b>${message.username}</b></span>
-                            <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-                            <span class="${message.date}"></span>
-                            <div class="message-dropdown-settings hidden">
-                                <ul class="message-settings-list">
-                                    <li class="message-setting-option edit-message-btn">Edit</li>
-                                    <li class="message-setting-option delete-message-btn">Delete</li>
-                                </ul>
+            getCurrentChatKey().then((key) => {
+                const messageListElement = document.getElementById('message-list');
+                const messages = data.val()[`${key}`].messages;
+                const message = messages[messages.length - 1];
+                if (message.username === "Fluffster team") {
+                    return undefined;
+                }
+                const listItem = document.createElement("li");
+                const currentUserPromise = utils.getCurrentUserData();
+                currentUserPromise.then(function (currentUser) {
+                    if (message.username === currentUser.username) {
+                        listItem.innerHTML += `
+                            <div class="message-wrapper">
+                            <div class="message-right messages">
+                                <div>
+                                    <span class="message-username"><b>${message.username}</b></span>
+                                    <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                                    <span class="${message.date}"></span>
+                                    <div class="message-dropdown-settings hidden">
+                                        <ul class="message-settings-list">
+                                            <li class="message-setting-option edit-message-btn">Edit</li>
+                                            <li class="message-setting-option delete-message-btn">Delete</li>
+                                        </ul>
+                                    </div>
+                                    <button class="message-settings-btn"><img class="message-three-dots-img" src="./assets/icons/three_dots.png" alt="chat-settings-icon"/></button>
+                                </div>
+                                <span class="message-text">${message.text}</span>
                             </div>
-                            <button class="message-settings-btn"><img class="message-three-dots-img" src="./assets/icons/three_dots.png" alt="chat-settings-icon"/></button>
+                            <div class="message-space-filler">
+                            </div>
                         </div>
-                        <span class="message-text">${message.text}</span>
-                    </div>
-                    <div class="message-space-filler">
-                    </div>
-                </div>
-                `;
-                listItem.setAttribute("class", "message-right-li");
-                }
-                else {
-                    listItem.innerHTML += `
-                    <div class="message-wrapper">
-                        <div class="message-left messages">
-                            <div>
-                                <span class="message-username"><b>${message.username}</b></span>
-                                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-                            <div>
-                            <span class="message-text">${message.text}</span>
-                        </div>
-                        <div class="message-space-filler">
-                        </div>
-                    </div>
-                `;
-                listItem.setAttribute("class", "message-left-li");
-                }
+                        `;
+                        listItem.setAttribute("class", "message-right-li");
+                    }
+                    else {
+                        listItem.innerHTML += `
+                            <div class="message-wrapper">
+                                <div class="message-left messages">
+                                    <div>
+                                        <span class="message-username"><b>${message.username}</b></span>
+                                        <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                                    <div>
+                                    <span class="message-text">${message.text}</span>
+                                </div>
+                                <div class="message-space-filler">
+                                </div>
+                            </div>
+                        `;
+                        listItem.setAttribute("class", "message-left-li");
+                    }
+                });
+                messageListElement.appendChild(listItem);
+                messageListElement.scrollTop = messageListElement.scrollHeight;
             });
-            messageListElement.appendChild(listItem);
-            messageListElement.scrollTop = messageListElement.scrollHeight;
-        });
+        }
+    });
 });
+
+export async function editMessageInDatabase(chatKey, username, date, text) {
+    var temp = chatKey.split('"')[1];
+    const chat = await getChatByKey(temp);
+    for (var i in chat.messages) {
+        var message = chat.messages[i];
+        if (message.date == date && message.username == username) {
+            var newMessages = chat.messages;
+            newMessages[i] = {
+                "username": message.username,
+                "date": message.date,
+                "text": text,
+            };
+            var updates = {};
+            updates["chats/" + temp + "/messages/"] = newMessages;
+            update(ref(database), updates);
+            return undefined;
+        }
+    }
+}
+
+export async function deleteMessageInDatabase(chatKey, username, date, text) {
+    const chat = await getChatByKey(chatKey);
+    var newMessages = [];
+    var index = 0;
+    for (var i in chat.messages) {
+        var message = chat.messages[i];
+        if (message.date == date && message.username == username) {
+            // 
+        }
+        else {
+            newMessages[index] = message;
+            index++;
+        }
+    }
+    const updates = {};
+    updates["chats/" + chatKey + "/messages/"] = newMessages;
+    update(ref(database), updates);
+    return undefined;
+}
+
 
 // ---------------------------------------------------------------------------------------------------------------------
 // sendMessageBtnElement.addEventListener("click", event => {
