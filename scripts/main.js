@@ -22,7 +22,7 @@ const database = getDatabase(app);
 const usersRef = ref(database, "users/");
 
 // imports:
-import { existingChat, createNewChat, loadChatRoom, deleteChat, showAllChats, loadChatRoomFromChatTab, removeChat, sendMessageRequest, renameFirstChat, createDefaultChat, loadMessageRequests, acceptChatRequest, declineChatRequest, isClearConnection } from "./chats.js";
+import { existingChat, createNewChat, loadChatRoom, deleteChat, showAllChats, loadChatRoomFromChatTab, removeChat, sendMessageRequest, renameFirstChat, createDefaultChat, loadMessageRequests, acceptChatRequest, declineChatRequest, isClearConnection, editMessageInDatabase, deleteMessageInDatabase, loadChatMessages, setIsModifiedDatabase, getIsModifiedDatabase } from "./chats.js";
 import * as utils from "./utils.js";
 
 // Session storage
@@ -50,7 +50,7 @@ const friendRequestsCountElement = document.getElementById('friend-requests-coun
 const chatRoomElement = document.getElementById('chat-room');
 const chatTabsBufferElement = document.getElementById('chat-tabs');
 const chatRequestsCountElement = document.getElementById('chat-requests-count');
-
+const messageListElement = document.getElementById('message-list');
 
 // Default onload page state
 window.addEventListener('load', (event) => {
@@ -75,6 +75,7 @@ window.addEventListener('load', (event) => {
     filterAllContactsButtonElement.classList.add('current-filter');
 
     updateTitle();
+    setIsModifiedDatabase(false);
 });
 
 async function test() {
@@ -361,7 +362,7 @@ async function showFriendRequests() {
         const isFriend = data[userId];
         if (isFriend === false) {
             var username;
-            if(users[userId].username.length >= 15) {
+            if (users[userId].username.length >= 15) {
                 username = users[userId].username.split('').slice(0, 15).join('') + "...";
             }
             else {
@@ -547,7 +548,7 @@ friendTabsBufferElement.addEventListener("click", (event) => {
             dropdownElement.classList.add('hidden');
         }
     }
-    if (element.classList.contains('new-chat-btn')) { 
+    if (element.classList.contains('new-chat-btn')) {
         const friendTabElement = element.parentElement.parentElement.parentElement;
         const username = friendTabElement.querySelector("span").textContent.trim();
         const currentUserUsernamePromise = utils.getCurrentUserData();
@@ -561,7 +562,7 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                         if (exists) {
                             const isClearConnectionPromise = isClearConnection(currentUser.username, username);
                             isClearConnectionPromise.then((connection) => {
-                                if(connection === true) {
+                                if (connection === true) {
                                     // console.log("READY TO CHAT!");
                                     loadChatRoom(recipientKey, username, currentUserKey);
                                     openMessagesTab();
@@ -602,7 +603,7 @@ friendTabsBufferElement.addEventListener("click", (event) => {
 // // Clicking behaviour in Contacts menu
 chatTabsBufferElement.addEventListener("click", (event) => {
     const element = event.target;
-    
+
     // Chat requests management
     if (element.classList.contains("accept-chat-request-btn")) {
         const requestTabElement = element.parentElement.parentElement;
@@ -674,4 +675,71 @@ chatTabsBufferElement.addEventListener("click", (event) => {
     //         }
     //     });
     // }
+});
+
+messageListElement.addEventListener("click", (event) => {
+    const element = event.target;
+
+    if (element.classList.contains('message-three-dots-img')) {
+        // const messageDivElement = element.parentElement;
+        // const username = messageDivElement.querySelector('.message-username').textContent.trim();
+        // const date = messageDivElement.querySelectorAll('span')[2].className;
+        // const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
+        // console.log(username);
+        // console.log(date);
+        // console.log(text);
+
+        // const messageDivWrapperElement = element.parentElement.parentElement.parentElement;
+        const messageDivElement = element.parentElement.parentElement;
+        const dropdownElement = messageDivElement.querySelector(".message-dropdown-settings");
+        if (dropdownElement.classList.contains('hidden')) {
+            dropdownElement.classList.remove('hidden');
+        }
+        else {
+            dropdownElement.classList.add('hidden');
+        }
+    }
+    if (element.classList.contains('edit-message-btn')) {
+        const messageDivElement = element.parentElement.parentElement.parentElement;
+        const username = messageDivElement.querySelector('.message-username').textContent.trim();
+        const date = messageDivElement.querySelectorAll('span')[2].className;
+        const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
+        messageDivElement.parentElement.querySelector('.message-text').innerHTML = `<input class="editting-message"  value="${text}"/>`;
+
+        const editMessageInputElement = document.getElementsByClassName('editting-message')[0];
+
+        editMessageInputElement.addEventListener("change", (event) => {
+            var newText;
+            if (editMessageInputElement.value.trim() === "") {
+                newText = text;
+            }
+            else {
+                newText = editMessageInputElement.value;
+            }
+            messageDivElement.parentElement.querySelector('.message-text').innerHTML = `<span class="message-text">${newText}</span>`;
+            let chatKey = sessionStorage.getItem('current-chat-key');
+            editMessageInDatabase(chatKey, username, date, newText);
+            setIsModifiedDatabase(true);
+        });
+
+        // Displaying information:
+        const dropdownElement = messageDivElement.querySelector(".message-dropdown-settings");
+        dropdownElement.classList.add('hidden');
+    }
+    if (element.classList.contains('delete-message-btn')) {
+        const messageDivElement = element.parentElement.parentElement.parentElement;
+        const username = messageDivElement.querySelector('.message-username').textContent.trim();
+        const date = messageDivElement.querySelectorAll('span')[2].className;
+        const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
+        let chatKeyNotFormated = sessionStorage.getItem('current-chat-key');
+        let chatKey = chatKeyNotFormated.split('"')[1];
+        deleteMessageInDatabase(chatKey, username, date, text);
+        setIsModifiedDatabase(true);
+
+        // Displaying information:
+        const currentMessage = messageDivElement.parentElement.parentElement.parentElement;
+        currentMessage.classList.add('hidden');
+        const dropdownElement = messageDivElement.querySelector(".message-dropdown-settings");
+        dropdownElement.classList.add('hidden');
+    }
 });
