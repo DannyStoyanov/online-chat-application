@@ -447,7 +447,7 @@ export async function showAllChats() {
                     </div>
                     <div class="chat-dropdown-settings hidden">
                         <ul class="chat-tab-settings">
-                            <li class="chat-setting-option add-contact-to-chat-btn">Add friend</li>
+                        <!--<li class="chat-setting-option add-contact-to-chat-btn">Add friend</li> -->
                             <li class="chat-setting-option remove-chat-btn">Delete chat</li>
                         </ul>
                     </div>
