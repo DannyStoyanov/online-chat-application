@@ -196,7 +196,7 @@ export function createNewChat(senderUsername, username) {
         console.error("chats.createNewChat(_): Couldn't write chat to database!");
     });
     sessionStorage.setItem("current-chat-key", JSON.stringify(newChatRef.key.trim()));
-    set(ref(database, "current-chat-key/"), chatKey);
+    set(ref(database, "current-chat-key/" + senderUsername), chatKey);
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
 
     addChatKeyToUsersDataViaUsernames(chatKey, username, senderUsername);
@@ -209,7 +209,7 @@ async function setDefaultChatKeyToSessionStorage() {
     let chatKey = await getChatKey([user.username, "Fluffster Team"]);
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-    set(ref(database, "current-chat-key/"), chatKey);
+    set(ref(database, "current-chat-key/" + user.username), chatKey);
 }
 
 // Linear search 
@@ -273,7 +273,7 @@ async function loadDefaultChat() {
     let chatKey = await getChatKey([currentUser.username, "Fluffster Team"]);
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-    set(ref(database, "current-chat-key/"), chatKey);
+    set(ref(database, "current-chat-key/" + currentUser.username), chatKey);
 }
 
 // Deletes chat from user's data
@@ -552,7 +552,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
             chatKey = key;
             sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
             msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-            set(ref(database, "current-chat-key/"), chatKey);
+            set(ref(database, "current-chat-key/" + currentUser.username), chatKey);
             loadChatMessages();
             return undefined;
         }
@@ -563,7 +563,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
     }
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-    set(ref(database, "current-chat-key/"), chatKey);
+    set(ref(database, "current-chat-key/" + currentUser.username), chatKey);
     loadChatMessages();
 }
 
@@ -582,7 +582,8 @@ async function getCurrentChat() {
 
 async function getCurrentChatKey() {
     const dbRef = ref(getDatabase());
-    const currentChatKey = await get(child(dbRef, "current-chat-key/"));
+    let currentUser = await utils.getCurrentUserData();
+    const currentChatKey = await get(child(dbRef, "current-chat-key/" + currentUser.username));
     if (currentChatKey === undefined) {
         console.error("chats.getCurrentChatKey(): Couldn't get current chat key data from database!");
         return undefined;
