@@ -717,7 +717,8 @@ messageListElement.addEventListener("click", (event) => {
                 newText = editMessageInputElement.value;
             }
             messageDivElement.parentElement.querySelector('.message-text').innerHTML = `<span class="message-text">${newText}</span>`;
-            let chatKey = sessionStorage.getItem('current-chat-key');
+            let chatKey =  JSON.parse(sessionStorage.getItem('current-chat-key'));
+            // let chatKey = chatKeyNotFormated.split('"')[1];
             editMessageInDatabase(chatKey, username, date, newText);
             setIsModifiedDatabase(true);
         });
@@ -731,8 +732,8 @@ messageListElement.addEventListener("click", (event) => {
         const username = messageDivElement.querySelector('.message-username').textContent.trim();
         const date = messageDivElement.querySelectorAll('span')[2].className;
         const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
-        let chatKeyNotFormated = sessionStorage.getItem('current-chat-key');
-        let chatKey = chatKeyNotFormated.split('"')[1];
+        let chatKey =  JSON.parse(sessionStorage.getItem('current-chat-key'));
+        // let chatKey = chatKeyNotFormated.split('"')[1];
         deleteMessageInDatabase(chatKey, username, date, text);
         setIsModifiedDatabase(true);
 

@@ -196,9 +196,9 @@ export function createNewChat(senderUsername, username) {
         console.error("chats.createNewChat(_): Couldn't write chat to database!");
     });
     sessionStorage.setItem("current-chat-key", JSON.stringify(newChatRef.key.trim()));
-    set(ref(database, "current-chat-key/" + senderUsername), chatKey);
+    set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-
+    
     addChatKeyToUsersDataViaUsernames(chatKey, username, senderUsername);
     return newChatRef.key;
 }
@@ -209,7 +209,7 @@ async function setDefaultChatKeyToSessionStorage() {
     let chatKey = await getChatKey([user.username, "Fluffster Team"]);
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-    set(ref(database, "current-chat-key/" + user.username), chatKey);
+    set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
 }
 
 // Linear search 
@@ -273,7 +273,7 @@ async function loadDefaultChat() {
     let chatKey = await getChatKey([currentUser.username, "Fluffster Team"]);
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-    set(ref(database, "current-chat-key/" + currentUser.username), chatKey);
+    set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
 }
 
 // Deletes chat from user's data
@@ -552,7 +552,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
             chatKey = key;
             sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
             msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-            set(ref(database, "current-chat-key/" + currentUser.username), chatKey);
+            set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
             loadChatMessages();
             return undefined;
         }
@@ -563,7 +563,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
     }
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-    set(ref(database, "current-chat-key/" + currentUser.username), chatKey);
+    set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
     loadChatMessages();
 }
 
@@ -583,7 +583,7 @@ async function getCurrentChat() {
 async function getCurrentChatKey() {
     const dbRef = ref(getDatabase());
     let currentUser = await utils.getCurrentUserData();
-    const currentChatKey = await get(child(dbRef, "current-chat-key/" + currentUser.username));
+    const currentChatKey = await get(child(dbRef, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))));
     if (currentChatKey === undefined) {
         console.error("chats.getCurrentChatKey(): Couldn't get current chat key data from database!");
         return undefined;
@@ -713,77 +713,82 @@ export async function loadChatMessages() {
     }
 }
 
-onValue(ref(database, "chats/"), (data) => { // onValue
-    getIsModifiedDatabase().then((value) => {
-        if(value === true) {
-            setIsModifiedDatabase(false);
-            return undefined;
-        }
-        else {
-            if (data === undefined) {
+onValue(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), (chatKeySnapshot) => {
+    onValue(ref(database, "chats/" + chatKeySnapshot.val()), (data) => { // onValue
+        console.log("NEW MESSAGE");
+        getIsModifiedDatabase().then((value) => {
+            if (value === true) {
+                setIsModifiedDatabase(false);
                 return undefined;
             }
-            getCurrentChatKey().then((key) => {
-                const messageListElement = document.getElementById('message-list');
-                const messages = data.val()[`${key}`].messages;
-                const message = messages[messages.length - 1];
-                if (message.username === "Fluffster team") {
+            else {
+                if (data === undefined) {
                     return undefined;
                 }
-                const listItem = document.createElement("li");
-                const currentUserPromise = utils.getCurrentUserData();
-                currentUserPromise.then(function (currentUser) {
-                    if (message.username === currentUser.username) {
-                        listItem.innerHTML += `
-                            <div class="message-wrapper">
-                            <div class="message-right messages">
-                                <div>
-                                    <span class="message-username"><b>${message.username}</b></span>
-                                    <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-                                    <span class="${message.date}"></span>
-                                    <div class="message-dropdown-settings hidden">
-                                        <ul class="message-settings-list">
-                                            <li class="message-setting-option edit-message-btn">Edit</li>
-                                            <li class="message-setting-option delete-message-btn">Delete</li>
-                                        </ul>
+                getCurrentChatKey().then((key) => {
+                    const messageListElement = document.getElementById('message-list');
+                    if(data.val() === null) {
+                        return undefined;
+                    }
+                    const messages = data.val().messages;
+                    const message = messages[messages.length - 1];
+                    if (message.username === "Fluffster team") {
+                        return undefined;
+                    }
+                    const listItem = document.createElement("li");
+                    const currentUserPromise = utils.getCurrentUserData();
+                    currentUserPromise.then(function (currentUser) {
+                        if (message.username === currentUser.username) {
+                            listItem.innerHTML += `
+                                    <div class="message-wrapper">
+                                    <div class="message-right messages">
+                                        <div>
+                                            <span class="message-username"><b>${message.username}</b></span>
+                                            <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                                            <span class="${message.date}"></span>
+                                            <div class="message-dropdown-settings hidden">
+                                                <ul class="message-settings-list">
+                                                    <li class="message-setting-option edit-message-btn">Edit</li>
+                                                    <li class="message-setting-option delete-message-btn">Delete</li>
+                                                </ul>
+                                            </div>
+                                            <button class="message-settings-btn"><img class="message-three-dots-img" src="./assets/icons/three_dots.png" alt="chat-settings-icon"/></button>
+                                        </div>
+                                        <span class="message-text">${message.text}</span>
                                     </div>
-                                    <button class="message-settings-btn"><img class="message-three-dots-img" src="./assets/icons/three_dots.png" alt="chat-settings-icon"/></button>
+                                    <div class="message-space-filler">
+                                    </div>
                                 </div>
-                                <span class="message-text">${message.text}</span>
-                            </div>
-                            <div class="message-space-filler">
-                            </div>
-                        </div>
-                        `;
-                        listItem.setAttribute("class", "message-right-li");
-                    }
-                    else {
-                        listItem.innerHTML += `
-                            <div class="message-wrapper">
-                                <div class="message-left messages">
-                                    <div>
-                                        <span class="message-username"><b>${message.username}</b></span>
-                                        <span class="message-date">${new Date(message.date).toLocaleString()}</span>
-                                    <div>
-                                    <span class="message-text">${message.text}</span>
-                                </div>
-                                <div class="message-space-filler">
-                                </div>
-                            </div>
-                        `;
-                        listItem.setAttribute("class", "message-left-li");
-                    }
+                                `;
+                            listItem.setAttribute("class", "message-right-li");
+                        }
+                        else {
+                            listItem.innerHTML += `
+                                    <div class="message-wrapper">
+                                        <div class="message-left messages">
+                                            <div>
+                                                <span class="message-username"><b>${message.username}</b></span>
+                                                <span class="message-date">${new Date(message.date).toLocaleString()}</span>
+                                            <div>
+                                            <span class="message-text">${message.text}</span>
+                                        </div>
+                                        <div class="message-space-filler">
+                                        </div>
+                                    </div>
+                                `;
+                            listItem.setAttribute("class", "message-left-li");
+                        }
+                    });
+                    messageListElement.appendChild(listItem);
+                    messageListElement.scrollTop = messageListElement.scrollHeight;
                 });
-                messageListElement.appendChild(listItem);
-                messageListElement.scrollTop = messageListElement.scrollHeight;
-            });
-        }
+            }
+        });
     });
 });
 
 export async function editMessageInDatabase(chatKey, username, date, text) {
-    var temp = chatKey.split('"')[1];
-    const chat = await getChatByKey(temp);
+    const chat = await getChatByKey(chatKey);
     for (var i in chat.messages) {
         var message = chat.messages[i];
         if (message.date == date && message.username == username) {
@@ -794,7 +799,7 @@ export async function editMessageInDatabase(chatKey, username, date, text) {
                 "text": text,
             };
             var updates = {};
-            updates["chats/" + temp + "/messages/"] = newMessages;
+            updates["chats/" + chatKey + "/messages/"] = newMessages;
             update(ref(database), updates);
             return undefined;
         }

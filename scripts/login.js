@@ -320,6 +320,7 @@ signUpButtonElement.addEventListener("click", event => {
         const key = writeNewUserData(email, username, password);
         sessionStorage.setItem("current-user", JSON.stringify(signUpEmailElement.value.trim()));
         sessionStorage.setItem("current-user-key", JSON.stringify(key));
+        sessionStorage.setItem('current-user-username', JSON.stringify(username));
 
         signUpFormElement.submit();
 
@@ -412,6 +413,7 @@ loginButtonElement.addEventListener("click", event => {
                 if (isCorrect === true) {
                     loginFormElement.submit();
                     sessionStorage.setItem("current-user", JSON.stringify(loginEmailElement.value.trim()));
+                    setCurrentUserUsernameToSessionStorage(loginEmailElement.value.trim());
 
                     loginEmailElement.value = "";
                     loginPasswordElement.value = "";
@@ -429,3 +431,8 @@ loginButtonElement.addEventListener("click", event => {
         }
     });
 });
+
+async function setCurrentUserUsernameToSessionStorage(email) {
+    let user = await getUserByEmail(email);
+    sessionStorage.setItem('current-user-username', JSON.stringify(user.username));
+}
