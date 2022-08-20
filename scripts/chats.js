@@ -179,6 +179,11 @@ export function createNewChat(senderUsername, username) {
     const dataRef = ref(database, "chats/");
     const newChatRef = push(dataRef);
     const chatKey = newChatRef.key;
+    sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
+    set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
+    msgsRef = ref(database, "chats/" + chatKey + "/messages/");
+    
+    addChatKeyToUsersDataViaUsernames(chatKey, username, senderUsername);
     set(ref(database, "chats/" + chatKey), {
         "name": [senderUsername, username],
         "sender": senderUsername,
@@ -192,15 +197,11 @@ export function createNewChat(senderUsername, username) {
         }] // }
     }).then(() => {
         // console.log("Data saved successfully");
+        return chatKey;
     }).catch((error) => {
         console.error("chats.createNewChat(_): Couldn't write chat to database!");
     });
-    sessionStorage.setItem("current-chat-key", JSON.stringify(newChatRef.key.trim()));
-    set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
-    msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-    
-    addChatKeyToUsersDataViaUsernames(chatKey, username, senderUsername);
-    return newChatRef.key;
+    return chatKey;
 }
 
 // Set default chat key to session storage
@@ -250,6 +251,7 @@ export async function existingChat(members) {
 
 // Creates default chat for each user on sign up or loads existing one
 export async function createDefaultChat() {
+    renameFirstChat(); // default chat
     let user = await utils.getCurrentUserData();
     let exists = await existingChat([user.username, "Fluffster Team"]);
     if (!exists) {
@@ -572,7 +574,6 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
 // }
 
 async function getCurrentChat() {
-    // const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
     const currentChatKey = await getCurrentChatKey().then((key) => {
         return key;
     });

@@ -55,7 +55,7 @@ const messageListElement = document.getElementById('message-list');
 // Default onload page state
 window.addEventListener('load', (event) => {
     createDefaultChat();
-
+    
     friendListElement.classList.add('hidden');
 
     friendListButtonElement.classList.remove('active-menu-option');
@@ -94,7 +94,6 @@ async function loadCurrentUserHelper() {
         return undefined;
     }
     loadCurrentUserData(currentUser);
-    renameFirstChat();
 }
 
 // Get and load current user data from database
