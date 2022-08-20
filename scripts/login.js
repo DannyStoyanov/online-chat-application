@@ -141,6 +141,12 @@ async function existingSignUpgEmailAddress() {
     });
 }
 
+// Regex username function
+function validateUsername(str) {
+    const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    return specialChars.test(str); 
+}
+
 // Check for user with the same username
 function existingUsername(username) {
     const usersPromise = getUsers();
@@ -159,6 +165,9 @@ function checkSignUpUsername() {
     const inputUsername = signUpUsernameElement.value.trim();
     if (inputUsername === "") {
         setErrorFor(signUpUsernameElement, "Username cannot be blank"); // add error message and red styling for input
+    }
+    else if(validateUsername(inputUsername)) {
+        setErrorFor(signUpUsernameElement, "Username cannot contain special characters"); // add error message and red styling for input
     }
     else {
         existingUsername(inputUsername).then(function (existingUsername) {
