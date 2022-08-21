@@ -207,7 +207,7 @@ export function createNewChat(senderUsername, username) {
 }
 
 // Set default chat key to session storage
-async function setDefaultChatKeyToSessionStorage() {
+export async function setDefaultChatKeyToSessionStorage() {
     let user = await utils.getCurrentUserData();
     let chatKey = await getChatKey([user.username, "Fluffster Team"]);
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));

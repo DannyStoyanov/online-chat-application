@@ -22,7 +22,7 @@ const database = getDatabase(app);
 const usersRef = ref(database, "users/");
 
 // imports:
-import { existingChat, createNewChat, loadChatRoom, deleteChat, showAllChats, loadChatRoomFromChatTab, removeChat, sendMessageRequest, renameFirstChat, createDefaultChat, loadChatRequests, acceptChatRequest, declineChatRequest, isClearConnection, editMessageInDatabase, deleteMessageInDatabase, loadChatMessages, setIsModifiedDatabase, getIsModifiedDatabase } from "./chats.js";
+import { existingChat, createNewChat, loadChatRoom, deleteChat, showAllChats, loadChatRoomFromChatTab, removeChat, sendMessageRequest, renameFirstChat, createDefaultChat, loadChatRequests, acceptChatRequest, declineChatRequest, isClearConnection, editMessageInDatabase, deleteMessageInDatabase, setIsModifiedDatabase, setDefaultChatKeyToSessionStorage } from "./chats.js";
 import * as utils from "./utils.js";
 
 // Session storage
@@ -194,7 +194,9 @@ function updateTitle() {
 
 // Redirect to login page
 function logOut() {
-    window.location.href = "login.html";
+    setDefaultChatKeyToSessionStorage().then(() => {
+        window.location.href = "login.html";
+    });
 }
 
 logOutButtonElement.addEventListener('click', (event) => {
