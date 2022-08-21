@@ -22,7 +22,7 @@ const database = getDatabase(app);
 const usersRef = ref(database, "users/");
 const globalDbRef = ref(database);
 
-var currentUserKey = {};
+var currentUserKey;
 
 // imports:
 import * as utils from "./utils.js";
@@ -42,12 +42,14 @@ window.addEventListener('load', (event) => {
 
 /*
 chat room
--name
 -members
 -messages
--private - true/false
+-name
+-recipient
+-sender
 */
 
+// Getter function for user's default chat
 async function getDefaultChat() {
     let user = await utils.getCurrentUserData();
     let chats = await getChats();
@@ -95,7 +97,7 @@ async function getChats() {
 export async function getChatKey(members) {
     let chats = await getChats();
     if (chats === undefined) {
-        console.log("Couln't find chats!");
+        console.log("Couldn't find chats!");
         return undefined;
     }
     for (var i in chats) {
@@ -182,7 +184,7 @@ export function createNewChat(senderUsername, username) {
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
-    
+
     addChatKeyToUsersDataViaUsernames(chatKey, username, senderUsername);
     set(ref(database, "chats/" + chatKey), {
         "name": [senderUsername, username],
@@ -336,7 +338,8 @@ export async function removeChat(recipientUsername) {
     }
 }
 
-export async function loadMessageRequests() {
+// Show chat requests
+export async function loadChatRequests() {
     chatTabsBufferElement.innerHTML = ``;
     const currentUserKey = await utils.getCurrentUserKey();
     const users = await utils.getUsers();
@@ -460,6 +463,7 @@ export async function showAllChats() {
     }
 }
 
+// Direct messages are allowed for two friends aka send and accepted friend request
 export async function isClearConnection(currentUserUsername, otherUserUsername) {
     const chatKey = await getChatKey([currentUserUsername, otherUserUsername]);
     const currentUser = await utils.getCurrentUserData();
@@ -573,6 +577,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
 //     let user = await utils.getCurrentUserData();
 // }
 
+// Getter function for current chat data from database
 async function getCurrentChat() {
     const currentChatKey = await getCurrentChatKey().then((key) => {
         return key;
@@ -581,6 +586,7 @@ async function getCurrentChat() {
     return chat;
 }
 
+// Getter function for current chat key from database
 async function getCurrentChatKey() {
     const dbRef = ref(getDatabase());
     let currentUser = await utils.getCurrentUserData();
@@ -592,10 +598,12 @@ async function getCurrentChatKey() {
     return currentChatKey.val();
 }
 
+// Setter function for editedMessage variable in database
 export function setIsModifiedDatabase(value) {
     set(ref(database, "editedMessage/"), value);
 }
 
+// Getter function for editedMesage variable in database
 export async function getIsModifiedDatabase(value) {
     const dbRef = ref(getDatabase());
     const snapshot = await get(child(dbRef, "editedMessage/"));
@@ -605,7 +613,6 @@ export async function getIsModifiedDatabase(value) {
     }
     return snapshot.val();
 }
-
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -623,7 +630,8 @@ var msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
 //     msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
 // });
 
-function proccessInput() {
+// Validation and after execution effects of the message input
+function proccessMessageInput() {
     if (messageInputElement.value.trim() === "") {
         return undefined;
     }
@@ -648,13 +656,14 @@ function proccessInput() {
 }
 
 sendMessageBtnElement.addEventListener("click", event => {
-    proccessInput();
+    proccessMessageInput();
 });
 
 messageInputElement.addEventListener("change", event => {
-    proccessInput();
+    proccessMessageInput();
 });
 
+// Load chat messages in the chat window
 export async function loadChatMessages() {
     var messageListElement = document.getElementById('message-list');
     messageListElement.innerHTML = ``;
@@ -714,9 +723,10 @@ export async function loadChatMessages() {
     }
 }
 
+// Event that handles new messages to the database
 onValue(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), (chatKeySnapshot) => {
     onValue(ref(database, "chats/" + chatKeySnapshot.val()), (data) => { // onValue
-        console.log("NEW MESSAGE");
+        // console.log("onValue: Call");
         getIsModifiedDatabase().then((value) => {
             if (value === true) {
                 setIsModifiedDatabase(false);
@@ -728,7 +738,7 @@ onValue(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('c
                 }
                 getCurrentChatKey().then((key) => {
                     const messageListElement = document.getElementById('message-list');
-                    if(data.val() === null) {
+                    if (data.val() === null) {
                         return undefined;
                     }
                     const messages = data.val().messages;
@@ -788,6 +798,7 @@ onValue(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('c
     });
 });
 
+// Edit message in database
 export async function editMessageInDatabase(chatKey, username, date, text) {
     const chat = await getChatByKey(chatKey);
     for (var i in chat.messages) {
@@ -807,6 +818,7 @@ export async function editMessageInDatabase(chatKey, username, date, text) {
     }
 }
 
+// Delete message in database
 export async function deleteMessageInDatabase(chatKey, username, date, text) {
     const chat = await getChatByKey(chatKey);
     var newMessages = [];
@@ -826,57 +838,3 @@ export async function deleteMessageInDatabase(chatKey, username, date, text) {
     update(ref(database), updates);
     return undefined;
 }
-
-
-// ---------------------------------------------------------------------------------------------------------------------
-// sendMessageBtnElement.addEventListener("click", event => {
-//     const currentChatKey = JSON.parse(sessionStorage.getItem("current-chat-key"));
-//     console.log(currentChatKey);
-//     const msgsRef = ref(database, "chats/" + currentChatKey + "/messages/");
-//     console.log(msgsRef);
-//     const messageRef = push(msgsRef);
-//     const currentUserPromise = utils.getCurrentUserData(); // await?
-//     currentUserPromise.then(function(currentUser) {
-//         set(messageRef, {
-//             "username": currentUser.username,
-//             "date": Date.now(),
-//             "text": messageInputElement.value,
-//         });
-//      messageInputElement.value = "";
-//     });
-// });
-
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-// function setDefaultChatsDatabaseState() {
-//     const currentUserPromise = utils.getCurrentUserData(); //await?
-//     currentUserPromise.then(function (currentUser) {
-//         const chatsPromise = getChats();
-//         return chatsPromise.then(function (chats) {
-//             if (chats !== undefined) {
-//                 var existingChat = false;
-//                 for (var key in chats) {
-//                     console.log(`${chats[key].name}  ---  ${chats[key].members} --- ${currentUser.username}`);
-//                     if ((chats[key].name === "Fluffster") && (chats[key].members[0] === currentUser.username)) {
-//                         console.log("PASS");
-//                         // sessionStorage.setItem("default-chat-key", JSON.stringify(key));
-//                         // sessionStorage.setItem("current-chat-key", JSON.stringify(key));
-//                         existingChat = true;
-//                     }
-//                 }
-//                 if (existingChat === false) {
-//                     let defaultChatKey = writeDefaultChat(currentUser.username);
-//                     sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
-//                     sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
-//                 }
-//             }
-//             else {
-//                 let defaultChatKey = writeDefaultChat(currentUser.username);
-//                 sessionStorage.setItem("default-chat-key", JSON.stringify(defaultChatKey));
-//                 sessionStorage.setItem("current-chat-key", JSON.stringify(defaultChatKey));
-//             }
-//             // loadDefaultChatWindow();
-//         });
-//     });
-// }

@@ -32,7 +32,7 @@ async function getUsers() {
             return snapshot.val();
         }
         else {
-            console.log("No such user data available");
+            // console.log("No such user data available");
         }
     }).catch((error) => {
         console.error(error);
@@ -52,7 +52,7 @@ async function getUserByEmail(email) {
             }
         }
         else {
-            console.log("No such user data available");
+            // console.log("No such user data available");
         }
     }).catch((error) => {
         console.error(error);
@@ -74,7 +74,7 @@ function writeNewUserData(email, username, password) {
         },
         "chats": { // old version "chats": [`${username}`]
             [username]: true,
-        } 
+        }
     }).then(() => {
         // console.log("Data saved successfully");
     }).catch((error) => {
@@ -144,7 +144,7 @@ async function existingSignUpgEmailAddress() {
 // Regex username function
 function validateUsername(str) {
     const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    return specialChars.test(str); 
+    return specialChars.test(str);
 }
 
 // Check for user with the same username
@@ -166,7 +166,7 @@ function checkSignUpUsername() {
     if (inputUsername === "") {
         setErrorFor(signUpUsernameElement, "Username cannot be blank"); // add error message and red styling for input
     }
-    else if(validateUsername(inputUsername)) {
+    else if (validateUsername(inputUsername)) {
         setErrorFor(signUpUsernameElement, "Username cannot contain special characters"); // add error message and red styling for input
     }
     else {
@@ -420,13 +420,13 @@ loginButtonElement.addEventListener("click", event => {
             setSuccessFor(loginEmailElement);
             checkEmailAndPass().then(function (isCorrect) {
                 if (isCorrect === true) {
-                    loginFormElement.submit();
                     sessionStorage.setItem("current-user", JSON.stringify(loginEmailElement.value.trim()));
-                    setCurrentUserUsernameToSessionStorage(loginEmailElement.value.trim());
-
-                    loginEmailElement.value = "";
-                    loginPasswordElement.value = "";
-                    window.location.href = "./main.html";
+                    setCurrentUserUsernameToSessionStorage(loginEmailElement.value.trim()).then(() => {
+                        loginFormElement.submit();
+                        loginEmailElement.value = "";
+                        loginPasswordElement.value = "";
+                        window.location.href = "./main.html";
+                    });
                 }
                 else {
                     setErrorFor(loginPasswordElement, "Incorrect password");
