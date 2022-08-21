@@ -97,7 +97,7 @@ async function getChats() {
 export async function getChatKey(members) {
     let chats = await getChats();
     if (chats === undefined) {
-        console.log("Couln't find chats!");
+        console.log("Couldn't find chats!");
         return undefined;
     }
     for (var i in chats) {
@@ -726,7 +726,7 @@ export async function loadChatMessages() {
 // Event that handles new messages to the database
 onValue(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), (chatKeySnapshot) => {
     onValue(ref(database, "chats/" + chatKeySnapshot.val()), (data) => { // onValue
-        console.log("onValue: Call");
+        // console.log("onValue: Call");
         getIsModifiedDatabase().then((value) => {
             if (value === true) {
                 setIsModifiedDatabase(false);

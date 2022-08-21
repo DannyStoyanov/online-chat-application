@@ -78,14 +78,6 @@ window.addEventListener('load', (event) => {
     setIsModifiedDatabase(false);
 });
 
-async function test() {
-    let x = await utils.getUserByKey("-N9CClk9RxTYJHn5H3TX");
-    console.log(x);
-    // let y = await utils.getUserByEmail2("danielzs@uni-sofia.bg");
-    // console.log(y);
-    // console.log(x == y);
-}
-
 // Helper function for loadCurrentUser()
 async function loadCurrentUserHelper() {
     let currentUser = await utils.getCurrentUserData();
@@ -562,7 +554,7 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                             const isClearConnectionPromise = isClearConnection(currentUser.username, username);
                             isClearConnectionPromise.then((connection) => {
                                 if (connection === true) {
-                                    // console.log("READY TO CHAT!");
+                                    // console.log("Established connection");
                                     loadChatRoom(recipientKey, username, currentUserKey);
                                     openMessagesTab();
                                 }
@@ -580,7 +572,6 @@ friendTabsBufferElement.addEventListener("click", (event) => {
                         else {
                             const chatKey = createNewChat(currentUser.username, username);
                             // console.log("Chat didn't exist! Created new chat!");
-                            // writeNewMessages("Chat sample", chatKey);
                             loadChatRoom(recipientKey, username, currentUserKey);
                             openMessagesTab();
                         }
@@ -680,14 +671,6 @@ messageListElement.addEventListener("click", (event) => {
     const element = event.target;
 
     if (element.classList.contains('message-three-dots-img')) {
-        // const messageDivElement = element.parentElement;
-        // const username = messageDivElement.querySelector('.message-username').textContent.trim();
-        // const date = messageDivElement.querySelectorAll('span')[2].className;
-        // const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
-        // console.log(username);
-        // console.log(date);
-        // console.log(text);
-
         // const messageDivWrapperElement = element.parentElement.parentElement.parentElement;
         const messageDivElement = element.parentElement.parentElement;
         const dropdownElement = messageDivElement.querySelector(".message-dropdown-settings");

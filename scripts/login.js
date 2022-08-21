@@ -32,7 +32,7 @@ async function getUsers() {
             return snapshot.val();
         }
         else {
-            console.log("No such user data available");
+            // console.log("No such user data available");
         }
     }).catch((error) => {
         console.error(error);
@@ -52,7 +52,7 @@ async function getUserByEmail(email) {
             }
         }
         else {
-            console.log("No such user data available");
+            // console.log("No such user data available");
         }
     }).catch((error) => {
         console.error(error);
@@ -420,13 +420,13 @@ loginButtonElement.addEventListener("click", event => {
             setSuccessFor(loginEmailElement);
             checkEmailAndPass().then(function (isCorrect) {
                 if (isCorrect === true) {
-                    loginFormElement.submit();
                     sessionStorage.setItem("current-user", JSON.stringify(loginEmailElement.value.trim()));
-                    setCurrentUserUsernameToSessionStorage(loginEmailElement.value.trim());
-
-                    loginEmailElement.value = "";
-                    loginPasswordElement.value = "";
-                    window.location.href = "./main.html";
+                    setCurrentUserUsernameToSessionStorage(loginEmailElement.value.trim()).then(() => {
+                        loginFormElement.submit();
+                        loginEmailElement.value = "";
+                        loginPasswordElement.value = "";
+                        window.location.href = "./main.html";
+                    });
                 }
                 else {
                     setErrorFor(loginPasswordElement, "Incorrect password");
