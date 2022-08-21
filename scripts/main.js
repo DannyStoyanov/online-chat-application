@@ -22,7 +22,7 @@ const database = getDatabase(app);
 const usersRef = ref(database, "users/");
 
 // imports:
-import { existingChat, createNewChat, loadChatRoom, deleteChat, showAllChats, loadChatRoomFromChatTab, removeChat, sendMessageRequest, renameFirstChat, createDefaultChat, loadMessageRequests, acceptChatRequest, declineChatRequest, isClearConnection, editMessageInDatabase, deleteMessageInDatabase, loadChatMessages, setIsModifiedDatabase, getIsModifiedDatabase } from "./chats.js";
+import { existingChat, createNewChat, loadChatRoom, deleteChat, showAllChats, loadChatRoomFromChatTab, removeChat, sendMessageRequest, renameFirstChat, createDefaultChat, loadChatRequests, acceptChatRequest, declineChatRequest, isClearConnection, editMessageInDatabase, deleteMessageInDatabase, loadChatMessages, setIsModifiedDatabase, getIsModifiedDatabase } from "./chats.js";
 import * as utils from "./utils.js";
 
 // Session storage
@@ -55,7 +55,7 @@ const messageListElement = document.getElementById('message-list');
 // Default onload page state
 window.addEventListener('load', (event) => {
     createDefaultChat();
-    
+
     friendListElement.classList.add('hidden');
 
     friendListButtonElement.classList.remove('active-menu-option');
@@ -246,7 +246,7 @@ filterAllMessagesButtonElement.addEventListener('click', (event) => {
 // Filter requests messages
 filterRequestsMessagesButtonElement.addEventListener('click', (event) => {
     filterRequestsMessagesButtonElement.classList.add('current-filter');
-    loadMessageRequests();
+    loadChatRequests();
 
     filterAllMessagesButtonElement.classList.remove('current-filter');
     // filterUnreadMessagesButtonElement.classList.remove('current-filter');
@@ -703,9 +703,9 @@ messageListElement.addEventListener("click", (event) => {
         const username = messageDivElement.querySelector('.message-username').textContent.trim();
         const date = messageDivElement.querySelectorAll('span')[2].className;
         const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
-        messageDivElement.parentElement.querySelector('.message-text').innerHTML = `<input class="editting-message"  value="${text}"/>`;
+        messageDivElement.parentElement.querySelector('.message-text').innerHTML = `<input class="editing-message"  value="${text}"/>`;
 
-        const editMessageInputElement = document.getElementsByClassName('editting-message')[0];
+        const editMessageInputElement = document.getElementsByClassName('editing-message')[0];
 
         editMessageInputElement.addEventListener("change", (event) => {
             var newText;
@@ -716,13 +716,16 @@ messageListElement.addEventListener("click", (event) => {
                 newText = editMessageInputElement.value;
             }
             messageDivElement.parentElement.querySelector('.message-text').innerHTML = `<span class="message-text">${newText}</span>`;
-            let chatKey =  JSON.parse(sessionStorage.getItem('current-chat-key'));
-            // let chatKey = chatKeyNotFormated.split('"')[1];
+            let chatKey = JSON.parse(sessionStorage.getItem('current-chat-key'));
+            let currentChatRef = ref(database, "chats/" + chatKey);
+
+            // Edit message in database
+            // currentChatRef.off();
             editMessageInDatabase(chatKey, username, date, newText);
             setIsModifiedDatabase(true);
         });
 
-        // Displaying information:
+        // Hide message menu
         const dropdownElement = messageDivElement.querySelector(".message-dropdown-settings");
         dropdownElement.classList.add('hidden');
     }
@@ -731,12 +734,15 @@ messageListElement.addEventListener("click", (event) => {
         const username = messageDivElement.querySelector('.message-username').textContent.trim();
         const date = messageDivElement.querySelectorAll('span')[2].className;
         const text = messageDivElement.parentElement.querySelector('.message-text').textContent;
-        let chatKey =  JSON.parse(sessionStorage.getItem('current-chat-key'));
-        // let chatKey = chatKeyNotFormated.split('"')[1];
+        let chatKey = JSON.parse(sessionStorage.getItem('current-chat-key'));
+        let currentChatRef = ref(database, "chats/" + chatKey);
+
+        // Delete message in database
+        // currentChatRef.off();
         deleteMessageInDatabase(chatKey, username, date, text);
         setIsModifiedDatabase(true);
 
-        // Displaying information:
+        // Hide message menu
         const currentMessage = messageDivElement.parentElement.parentElement.parentElement;
         currentMessage.classList.add('hidden');
         const dropdownElement = messageDivElement.querySelector(".message-dropdown-settings");

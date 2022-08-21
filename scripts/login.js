@@ -74,7 +74,7 @@ function writeNewUserData(email, username, password) {
         },
         "chats": { // old version "chats": [`${username}`]
             [username]: true,
-        } 
+        }
     }).then(() => {
         // console.log("Data saved successfully");
     }).catch((error) => {
@@ -144,7 +144,7 @@ async function existingSignUpgEmailAddress() {
 // Regex username function
 function validateUsername(str) {
     const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    return specialChars.test(str); 
+    return specialChars.test(str);
 }
 
 // Check for user with the same username
@@ -166,7 +166,7 @@ function checkSignUpUsername() {
     if (inputUsername === "") {
         setErrorFor(signUpUsernameElement, "Username cannot be blank"); // add error message and red styling for input
     }
-    else if(validateUsername(inputUsername)) {
+    else if (validateUsername(inputUsername)) {
         setErrorFor(signUpUsernameElement, "Username cannot contain special characters"); // add error message and red styling for input
     }
     else {
