@@ -199,6 +199,10 @@ function logOut() {
     });
 }
 
+window.onbeforeunload = function () {
+    setDefaultChatKeyToSessionStorage();
+};
+
 logOutButtonElement.addEventListener('click', (event) => {
     logOut();
 });

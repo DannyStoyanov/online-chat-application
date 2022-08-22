@@ -181,6 +181,7 @@ export function createNewChat(senderUsername, username) {
     const dataRef = ref(database, "chats/");
     const newChatRef = push(dataRef);
     const chatKey = newChatRef.key;
+    detachListenerFromDatabase(sessionStorage.getItem('current-chat-key'));
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
@@ -210,6 +211,7 @@ export function createNewChat(senderUsername, username) {
 export async function setDefaultChatKeyToSessionStorage() {
     let user = await utils.getCurrentUserData();
     let chatKey = await getChatKey([user.username, "Fluffster Team"]);
+    detachListenerFromDatabase(sessionStorage.getItem('current-chat-key'));
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
     set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
@@ -275,6 +277,7 @@ async function loadDefaultChat() {
     let currentUserKey = await utils.getCurrentUserKey();
     loadChatRoom(currentUserKey, "Fluffster Team", currentUserKey);
     let chatKey = await getChatKey([currentUser.username, "Fluffster Team"]);
+    detachListenerFromDatabase(sessionStorage.getItem('current-chat-key'));
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
     set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
@@ -556,6 +559,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
     for (var key in currentUser.chats) {
         if (containsElement(key, Object.keys(recipient.chats)) === true) {
             chatKey = key;
+            detachListenerFromDatabase(sessionStorage.getItem('current-chat-key'));
             sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
             msgsRef = ref(database, "chats/" + chatKey + "/messages/");
             set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
@@ -567,6 +571,7 @@ export async function loadChatRoom(recipientKey, username, currentUserKey) {
         // console.log("Error msg: Couldn't find chat!");
         return undefined;
     }
+    detachListenerFromDatabase(sessionStorage.getItem('current-chat-key'));
     sessionStorage.setItem("current-chat-key", JSON.stringify(chatKey));
     msgsRef = ref(database, "chats/" + chatKey + "/messages/");
     set(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), chatKey);
@@ -726,7 +731,6 @@ export async function loadChatMessages() {
 // Event that handles new messages to the database
 onValue(ref(database, "current-chat-key/" + JSON.parse(sessionStorage.getItem('current-user-username'))), (chatKeySnapshot) => {
     onValue(ref(database, "chats/" + chatKeySnapshot.val()), (data) => { // onValue
-        // console.log("onValue: Call");
         getIsModifiedDatabase().then((value) => {
             if (value === true) {
                 setIsModifiedDatabase(false);
@@ -837,4 +841,9 @@ export async function deleteMessageInDatabase(chatKey, username, date, text) {
     updates["chats/" + chatKey + "/messages/"] = newMessages;
     update(ref(database), updates);
     return undefined;
+}
+
+function detachListenerFromDatabase(chatKey) {
+    // let currentChatRef = ref(database, "chats/" + chatKey);
+    // currentChatRef.off();
 }
