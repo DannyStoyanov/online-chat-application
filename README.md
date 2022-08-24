@@ -1,8 +1,4 @@
-<div style="display: flex; justify-content: flex-start; align-items: center;">
-<img src="/assets/logo.png" width="75px"/>
-<span style="color: #2C6975; font-size: 3em;">Fluffster</span>
-</div>
-
+<img src="/assets/logo.png" width="50px"/> Fluffster
 
 ## Overview
 Fluffster is a primitive online chat application alternative to messenger that allows sending messages between registered users. Scripts are entirely implemented with Vanilla JS. Database used for the project is Firebase Realtime Database.
@@ -26,4 +22,3 @@ Fluffster is a primitive online chat application alternative to messenger that a
 
 ## Platforms
 - Web
-
