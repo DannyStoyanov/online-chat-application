@@ -1,4 +1,4 @@
-<img src="/assets/logo.png" width="50px"/> Fluffster
+<img src="/assets/readme_logo.png" width="350" height="150" />
 
 ## Overview
 Fluffster is a primitive online chat application alternative to messenger that allows sending messages between registered users. Scripts are entirely implemented with Vanilla JS. Database used for the project is Firebase Realtime Database.
